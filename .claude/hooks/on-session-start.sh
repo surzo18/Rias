@@ -8,13 +8,13 @@ LEARNINGS_DIR="$PROJECT_DIR/.claude/learnings"
 
 # Clean handovers older than 7 days
 if [ -d "$HANDOVERS_DIR" ]; then
-  find "$HANDOVERS_DIR" -name "*.md" -mtime +7 -delete 2>/dev/null || true
+  find "$HANDOVERS_DIR" -name "*.md" -mtime +7 -delete 2>/dev/null || :
 fi
 
 # Find latest handover
 LATEST=""
 if [ -d "$HANDOVERS_DIR" ]; then
-  LATEST=$(ls -t "$HANDOVERS_DIR"/*.md 2>/dev/null | head -1 || true)
+  LATEST=$(ls -t "$HANDOVERS_DIR"/*.md 2>/dev/null | head -1) || LATEST=""
 fi
 
 OUTPUT=""
@@ -28,7 +28,7 @@ fi
 for file in mistakes patterns decisions; do
   filepath="$LEARNINGS_DIR/$file.md"
   if [ -f "$filepath" ]; then
-    count=$(grep -c "^### " "$filepath" 2>/dev/null || echo "0")
+    count=$(grep -c "^### " "$filepath" 2>/dev/null) || count=0
     if [ "$count" -gt 0 ]; then
       OUTPUT+="Learnings/$file: $count entries\n"
     fi

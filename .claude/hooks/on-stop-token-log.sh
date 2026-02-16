@@ -17,10 +17,11 @@ if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
   exit 0
 fi
 
-# Parse JSONL: sum input_tokens + output_tokens from assistant messages, count turns
-STATS=$(node -e "
+# Parse JSONL: sum tokens from assistant messages, format output in one Node.js call
+RESULT=$(node -e "
   const fs = require('fs');
-  const lines = fs.readFileSync('$TRANSCRIPT','utf8').trim().split('\n');
+  const path = process.argv[1];
+  const lines = fs.readFileSync(path,'utf8').trim().split('\n');
   let inputTokens = 0, outputTokens = 0, turns = 0;
   for (const line of lines) {
     try {
@@ -32,34 +33,15 @@ STATS=$(node -e "
       }
     } catch {}
   }
-  console.log(JSON.stringify({ inputTokens, outputTokens, total: inputTokens + outputTokens, turns }));
-" 2>/dev/null || echo "")
+  const total = inputTokens + outputTokens;
+  if (total === 0) { process.exit(1); }
+  const fmt = n => n.toLocaleString();
+  console.log([fmt(inputTokens), fmt(outputTokens), fmt(total), turns].join('|'));
+" "$TRANSCRIPT" 2>/dev/null) || exit 0
 
-if [ -z "$STATS" ]; then
-  exit 0
-fi
-
-INPUT_TOKENS=$(echo "$STATS" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).inputTokens))")
-OUTPUT_TOKENS=$(echo "$STATS" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).outputTokens))")
-TOTAL=$(echo "$STATS" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).total))")
-TURNS=$(echo "$STATS" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(JSON.parse(d).turns))")
-
-# Skip if no usage data found
-if [ "$TOTAL" = "0" ]; then
-  exit 0
-fi
-
-# Format numbers with commas
-format_number() {
-  echo "$1" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>console.log(Number(d.trim()).toLocaleString()))"
-}
-
-INPUT_FMT=$(format_number "$INPUT_TOKENS")
-OUTPUT_FMT=$(format_number "$OUTPUT_TOKENS")
-TOTAL_FMT=$(format_number "$TOTAL")
+IFS='|' read -r INPUT_FMT OUTPUT_FMT TOTAL_FMT TURNS <<< "$RESULT"
 
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
-
 LOG_FILE="$CLAUDE_PROJECT_DIR/.claude/learnings/token-usage.md"
 
 # Create file with header if it doesn't exist

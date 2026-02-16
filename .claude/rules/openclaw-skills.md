@@ -30,6 +30,9 @@ description: What this skill does
 - `command-dispatch: tool`
 - `command-tool` - tool to invoke
 - `command-arg-mode: raw`
+- `argument-hint` - hint text for slash command arguments (e.g., `"[branch-name]"`)
+- `context: fork` - run skill in forked context (used with agent dispatch)
+- `agent` - dispatch to a named subagent (e.g., `agent: reflector`)
 - `homepage` - URL
 
 ## Skill Loading Priority (highest to lowest)

@@ -12,8 +12,8 @@ if ! echo "$COMMAND" | grep -q "^git "; then
   exit 0
 fi
 
-# Block force push
-if echo "$COMMAND" | grep -qE "git push.*--force[^-]|git push.*--force$"; then
+# Block force push (--force and -f short form)
+if echo "$COMMAND" | grep -qE "git push.*(--force[^-]|--force$| -f\b| -f$)"; then
   echo "BLOCKED: Force push is not allowed. Use --force-with-lease if absolutely necessary." >&2
   exit 2
 fi

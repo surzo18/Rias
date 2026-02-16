@@ -16,6 +16,7 @@ The hooks system captures learnings automatically:
 | Mistakes | `learnings/mistakes.md` | Tool failure (automatic) |
 | Patterns | `learnings/patterns.md` | Stop hook detects pattern (automatic) |
 | Decisions | `learnings/decisions.md` | Stop hook detects decision (automatic) |
+| Token usage | `learnings/token-usage.md` | Stop hook logs per-session totals (automatic) |
 
 ## Token Tracking
 

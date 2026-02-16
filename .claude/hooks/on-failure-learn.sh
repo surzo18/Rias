@@ -13,6 +13,9 @@ TOOL_NAME=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);p
 ERROR_MSG=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log((j.error||'unknown').slice(0,200))}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
 DATE=$(date +%Y-%m-%d)
 
+# Ensure learnings directory exists
+mkdir -p "$(dirname "$MISTAKES_FILE")"
+
 # Append to mistakes file
 cat >> "$MISTAKES_FILE" << EOF
 

@@ -33,5 +33,5 @@ Check git status and recent commits for current work state.
 - Check \`.claude/learnings/\` for any new entries from this session
 EOF
 
-echo "Handover saved to $HANDOVER_FILE"
+echo "Handover saved to $HANDOVER_FILE" >&2
 exit 0

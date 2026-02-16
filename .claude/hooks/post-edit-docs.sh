@@ -11,7 +11,8 @@ FILE_PATH=$(echo "$INPUT" | node -e "
   const input = require('fs').readFileSync('/dev/stdin', 'utf8');
   try {
     const data = JSON.parse(input);
-    console.log(data.file_path || data.filePath || '');
+    const ti = data.tool_input || {};
+    console.log(ti.file_path || ti.filePath || '');
   } catch {
     console.log('');
   }
