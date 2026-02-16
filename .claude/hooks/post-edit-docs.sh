@@ -7,16 +7,7 @@ set -euo pipefail
 INPUT=$(cat)
 
 # Extract the file path from the tool input using node
-FILE_PATH=$(echo "$INPUT" | node -e "
-  const input = require('fs').readFileSync('/dev/stdin', 'utf8');
-  try {
-    const data = JSON.parse(input);
-    const ti = data.tool_input || {};
-    console.log(ti.file_path || ti.filePath || '');
-  } catch {
-    console.log('');
-  }
-" 2>/dev/null || echo "")
+FILE_PATH=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);const ti=j.tool_input||{};console.log(ti.file_path||ti.filePath||'')}catch{console.log('')}})" 2>/dev/null || echo "")
 
 if [ -z "$FILE_PATH" ]; then
   exit 0
