@@ -64,9 +64,10 @@ Additional dirs via `skills.load.extraDirs` in `~/.openclaw/openclaw.json`.
 ## Build & Test Commands
 
 ```bash
-# TBD - stack not yet decided
 npm install                  # Install dependencies
-npm test                     # Run tests
+npm test                     # Run tests (TBD)
+npm run changelog            # Regenerate CHANGELOG.md (append new)
+npm run changelog:init       # Regenerate CHANGELOG.md (full rebuild)
 ```
 
 ## Project Structure
@@ -80,13 +81,16 @@ tools/Rias/
 │   │   ├── on-session-start.sh     # Load handover + learnings
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context
-│   │   └── validate-git-ops.sh     # Git operation validation
+│   │   ├── validate-git-ops.sh     # Git operation validation
+│   │   └── post-edit-docs.sh       # Doc update reminders
 │   ├── rules/               # Auto-loaded project rules
 │   │   ├── openclaw-skills.md      # OpenClaw skill format rules
-│   │   └── self-improvement.md     # Learning system rules
+│   │   ├── self-improvement.md     # Learning system rules
+│   │   └── documentation.md        # Doc format standards
 │   ├── skills/              # Claude Code skills
 │   │   ├── git-management/SKILL.md # Git workflow enforcement
-│   │   └── reflect/SKILL.md        # Deep reflection trigger
+│   │   ├── reflect/SKILL.md        # Deep reflection trigger
+│   │   └── update-docs/SKILL.md    # Doc regeneration/validation
 │   ├── agents/              # Custom subagent definitions
 │   │   └── reflector.md            # Learnings analysis agent
 │   ├── learnings/           # Auto-populated by hooks
@@ -95,7 +99,13 @@ tools/Rias/
 │   │   └── decisions.md            # Architecture decisions
 │   ├── handovers/           # Session context (auto-managed)
 │   └── agent-memory/        # Persistent subagent memory
+├── docs/
+│   └── skills/
+│       └── index.md         # Skill inventory
 ├── skills/                  # OpenClaw skills (TBD)
+├── package.json             # Changelog scripts + devDependencies
+├── CHANGELOG.md             # Auto-generated from conventional commits
+├── README.md                # User-facing project docs
 ├── CLAUDE.md
 └── .gitignore
 ```
@@ -108,6 +118,7 @@ Automatic learning via Claude Code hooks:
 |------------|--------|---------|
 | SessionStart | `on-session-start.sh` | Load latest handover, clean old ones, summarize learnings |
 | PostToolUseFailure | `on-failure-learn.sh` | Record tool errors to `learnings/mistakes.md` |
+| PostToolUse (Write\|Edit) | `post-edit-docs.sh` | Remind to update docs when relevant files change |
 | Stop | prompt hook (haiku) | Evaluate if anything notable happened, record to learnings |
 | PreCompact | `on-compact-handover.sh` | Save session context before compaction |
 | PreToolUse (Bash) | `validate-git-ops.sh` | Block force push, validate branch names |

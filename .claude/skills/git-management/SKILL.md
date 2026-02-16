@@ -66,6 +66,15 @@ cd /d/REPOS/tools/Rias && git checkout -b <prefix>/<name>
 | New dependency added | `tools/Rias/CLAUDE.md` (stack section) |
 | Architecture change | `tools/Rias/CLAUDE.md` (project structure, conventions) |
 
+### Documentation files
+
+| Trigger | Update |
+|---------|--------|
+| New skill added/removed | `docs/skills/index.md` + `README.md` skills table |
+| New npm script added | `README.md` quick start + `CLAUDE.md` build commands |
+| Project structure changed | `README.md` structure tree + `CLAUDE.md` structure tree |
+| New hook added/changed | `CLAUDE.md` hooks table + `settings.json` |
+
 ### Root workspace files
 
 | Trigger | Update |

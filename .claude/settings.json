@@ -44,6 +44,20 @@
       }
     ],
 
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-docs.sh\"",
+            "timeout": 5,
+            "statusMessage": "Checking doc updates..."
+          }
+        ]
+      }
+    ],
+
     "PreToolUse": [
       {
         "matcher": "Bash",
