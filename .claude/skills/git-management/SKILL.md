@@ -1,6 +1,8 @@
 ---
 name: git-management
 description: Use before ANY git operation (branch, commit, PR, merge) in the Rias project to enforce workflow conventions and Claude infrastructure sync.
+user-invocable: true
+argument-hint: "[branch-name|commit-message]"
 ---
 
 # Git Management - Rias

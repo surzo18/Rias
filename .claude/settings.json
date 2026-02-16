@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "permissions": {
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(git reset --hard *)",
+      "Bash(git checkout . *)",
+      "Bash(git clean -f *)",
+      "Bash(rm -rf *)"
+    ]
+  },
+
+  "includeCoAuthoredBy": true,
+
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-session-start.sh\"",
+            "timeout": 10,
+            "statusMessage": "Loading session context..."
+          }
+        ]
+      }
+    ],
+
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-failure-learn.sh\"",
+            "timeout": 5,
+            "statusMessage": "Recording error..."
+          }
+        ]
+      }
+    ],
+
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit.sh\"",
+            "timeout": 10,
+            "statusMessage": "Validating git operation..."
+          }
+        ]
+      }
+    ],
+
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Review your last response. Did you: (1) get corrected by the user, (2) discover a new pattern or convention, (3) make an architectural decision, or (4) learn something notable about OpenClaw or this project? If YES to any, respond with JSON: {\"ok\": false, \"reason\": \"LEARNING: <category>: <concise description>\"} where category is 'mistake', 'pattern', or 'decision'. If nothing notable, respond {\"ok\": true}.",
+            "model": "haiku",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-compact-handover.sh\"",
+            "timeout": 10,
+            "statusMessage": "Saving session handover..."
+          }
+        ]
+      }
+    ]
+  }
+}

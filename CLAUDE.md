@@ -74,14 +74,49 @@ npm test                     # Run tests
 ```
 tools/Rias/
 ├── .claude/
-│   └── skills/              # Claude Code skills (local)
+│   ├── settings.json        # Hooks, permissions (team-shared)
+│   ├── settings.local.json  # Personal overrides (gitignored)
+│   ├── hooks/               # Hook scripts
+│   │   ├── on-session-start.sh     # Load handover + learnings
+│   │   ├── on-failure-learn.sh     # Record tool errors
+│   │   ├── on-compact-handover.sh  # Save session context
+│   │   └── pre-commit.sh           # Git operation validation
+│   ├── rules/               # Auto-loaded project rules
+│   │   ├── openclaw-skills.md      # OpenClaw skill format rules
+│   │   └── self-improvement.md     # Learning system rules
+│   ├── skills/              # Claude Code skills
+│   │   ├── git-management/SKILL.md # Git workflow enforcement
+│   │   └── reflect/SKILL.md        # Deep reflection trigger
+│   ├── agents/              # Custom subagent definitions
+│   │   └── reflector.md            # Learnings analysis agent
+│   ├── learnings/           # Auto-populated by hooks
+│   │   ├── mistakes.md             # Tool errors
+│   │   ├── patterns.md             # Discovered patterns
+│   │   └── decisions.md            # Architecture decisions
+│   ├── handovers/           # Session context (auto-managed)
+│   └── agent-memory/        # Persistent subagent memory
 ├── skills/                  # OpenClaw skills (TBD)
 ├── CLAUDE.md
 └── .gitignore
 ```
+
+## Self-Improvement System
+
+Automatic learning via Claude Code hooks:
+
+| Hook Event | Script | Purpose |
+|------------|--------|---------|
+| SessionStart | `on-session-start.sh` | Load latest handover, clean old ones, summarize learnings |
+| PostToolUseFailure | `on-failure-learn.sh` | Record tool errors to `learnings/mistakes.md` |
+| Stop | prompt hook (haiku) | Evaluate if anything notable happened, record to learnings |
+| PreCompact | `on-compact-handover.sh` | Save session context before compaction |
+| PreToolUse (Bash) | `pre-commit.sh` | Block force push, validate branch names, check commit format |
+
+Manual: `/reflect` triggers the reflector agent for deep analysis.
 
 ## Conventions
 
 - Follows root `D:\REPOS\.claude\rules\` (git-workflow, code-style, tdd)
 - Code and commits in English
 - User-facing docs in Slovak
+- OpenClaw skills follow `SKILL.md` format (see `.claude/rules/openclaw-skills.md`)
