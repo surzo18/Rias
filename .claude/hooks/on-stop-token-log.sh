@@ -58,6 +58,12 @@ if [ ! -f "$LOG_FILE" ]; then
   echo "" >> "$LOG_FILE"
 fi
 
+# Log hook execution
+HOOK_LOG="$PROJECT_DIR/.claude/learnings/hook-log.md"
+if [ -f "$HOOK_LOG" ]; then
+  printf '| %s | stop-token-log | ok | %s tokens, %s turns |\n' "$TIMESTAMP" "$TOTAL_FMT" "$TURNS" >> "$HOOK_LOG"
+fi
+
 # Append entry
 cat >> "$LOG_FILE" << EOF
 

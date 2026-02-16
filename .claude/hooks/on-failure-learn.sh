@@ -16,6 +16,12 @@ DATE=$(date +%Y-%m-%d)
 # Ensure learnings directory exists
 mkdir -p "$(dirname "$MISTAKES_FILE")"
 
+# Log hook execution
+HOOK_LOG="$PROJECT_DIR/.claude/learnings/hook-log.md"
+if [ -f "$HOOK_LOG" ]; then
+  printf '| %s | failure-learn | ok | %s: %s |\n' "$(date +'%Y-%m-%d %H:%M')" "$TOOL_NAME" "$(echo "$ERROR_MSG" | head -c 50)" >> "$HOOK_LOG"
+fi
+
 # Bloat protection: warn if file exceeds 100 lines
 if [ -f "$MISTAKES_FILE" ]; then
   LINE_COUNT=$(wc -l < "$MISTAKES_FILE" 2>/dev/null || echo "0")

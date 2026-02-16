@@ -42,8 +42,17 @@ Use `/reflect` to trigger deep analysis:
 - Analyzes token usage trends
 - Cleans up stale/duplicate entries
 
+## Session Tracking & Periodic Audit
+
+- **Counter:** `.claude/agent-memory/session-counter.json` tracks session count
+- **Hook log:** `.claude/learnings/hook-log.md` records every hook execution
+- **Audit trigger:** Every 100 sessions, SessionStart outputs audit reminder
+- **Audit skill:** `/audit-infra` runs 8-section comprehensive audit
+- **After audit:** Update `lastAuditAt` and `lastAuditDate` in counter file
+
 ## Bloat Protection
 
-- Learnings files: soft 100-line limit per file
+- Learnings files: soft 100-line limit per file (enforced by hooks with warnings)
+- Hook log: truncate at 500 lines (keep last 200) during audit
 - Handovers: auto-deleted after 7 days
 - Only record genuinely notable learnings, not trivial observations

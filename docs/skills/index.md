@@ -27,6 +27,22 @@ All Claude Code skills available in the Rias project.
   - Analyzes token consumption trends and flags high-usage sessions
   - Dispatches to reflector subagent
 
+## audit-infra
+
+- **Command:** `/audit-infra`
+- **File:** `.claude/skills/audit-infra/SKILL.md`
+- **Description:** Comprehensive infrastructure audit covering 8 areas. Triggered automatically every 100 sessions or manually.
+- **Key behaviors:**
+  - Checks security (hooks, permissions, secret scanning)
+  - Reviews token consumption trends
+  - Scans for errors and recurring bugs
+  - Verifies hook execution logs
+  - Validates documentation accuracy
+  - Checks infrastructure consistency
+  - Verifies git state and workflow compliance
+  - Cleans up stale files and bloated learnings
+  - Updates session counter after completion
+
 ## update-docs
 
 - **Command:** `/update-docs`

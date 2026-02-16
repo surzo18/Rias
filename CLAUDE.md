@@ -80,7 +80,7 @@ tools/Rias/
 │   ├── settings.json        # Hooks, permissions (team-shared)
 │   ├── settings.local.json  # Personal overrides (gitignored)
 │   ├── hooks/               # Hook scripts
-│   │   ├── on-session-start.sh     # Load handover + learnings
+│   │   ├── on-session-start.sh     # Load handover, session counter, audit trigger
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context
 │   │   ├── on-stop-learn.sh         # Persist learnings from transcript
@@ -95,16 +95,19 @@ tools/Rias/
 │   ├── skills/              # Claude Code skills
 │   │   ├── git-management/SKILL.md # Version-based workflow enforcement
 │   │   ├── reflect/SKILL.md        # Deep reflection trigger
-│   │   └── update-docs/SKILL.md    # Doc regeneration/validation
+│   │   ├── update-docs/SKILL.md    # Doc regeneration/validation
+│   │   └── audit-infra/SKILL.md   # Periodic infrastructure audit
 │   ├── agents/              # Custom subagent definitions
 │   │   └── reflector.md            # Learnings analysis agent
 │   ├── learnings/           # Auto-populated by hooks
 │   │   ├── mistakes.md             # Tool errors
 │   │   ├── patterns.md             # Discovered patterns
 │   │   ├── decisions.md            # Architecture decisions
-│   │   └── token-usage.md          # Session token consumption
+│   │   ├── token-usage.md          # Session token consumption
+│   │   └── hook-log.md             # Hook execution log
 │   ├── handovers/           # Session context (auto-managed)
 │   └── agent-memory/        # Persistent subagent memory
+│       └── session-counter.json   # Session count + audit tracking
 ├── test/                    # Hook tests (node:test runner)
 │   ├── helpers.js                  # Shared test helper (spawnSync)
 │   ├── setup.test.js               # Smoke test
@@ -129,7 +132,7 @@ Automatic learning via Claude Code hooks:
 
 | Hook Event | Script | Purpose |
 |------------|--------|---------|
-| SessionStart | `on-session-start.sh` | Load latest handover, clean old ones, summarize learnings |
+| SessionStart | `on-session-start.sh` | Load handover, session counter, audit trigger, hook logging |
 | PostToolUseFailure | `on-failure-learn.sh` | Record tool errors to `learnings/mistakes.md` |
 | PostToolUse (Write\|Edit) | `post-edit-docs.sh` | Remind to update docs when relevant files change |
 | Stop (command) | `on-stop-learn.sh` | Parse transcript for corrections, patterns, decisions → persist to learnings/ |

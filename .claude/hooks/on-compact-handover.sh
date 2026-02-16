@@ -48,5 +48,11 @@ $GIT_LOG
 - Check \`.claude/learnings/\` for any new entries from this session
 EOF
 
+# Log hook execution
+HOOK_LOG="$PROJECT_DIR/.claude/learnings/hook-log.md"
+if [ -f "$HOOK_LOG" ]; then
+  printf '| %s | compact-handover | ok | saved to %s |\n' "$(date +'%Y-%m-%d %H:%M')" "$(basename "$HANDOVER_FILE")" >> "$HOOK_LOG"
+fi
+
 echo "Handover saved to $HANDOVER_FILE" >&2
 exit 0

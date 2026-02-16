@@ -47,17 +47,34 @@ describe('on-session-start.sh', () => {
     assert.match(r.stdout, /mistakes.*2/i);
   });
 
-  it('should not output anything when directories are empty', () => {
+  it('should always output session counter', () => {
     mkdirSync(resolve(tempDir, '.claude', 'handovers'), { recursive: true });
     mkdirSync(resolve(tempDir, '.claude', 'learnings'), { recursive: true });
 
     const r = run();
     assert.equal(r.exitCode, 0);
-    assert.equal(r.stdout.trim(), '');
+    assert.match(r.stdout, /Session #\d+/);
   });
 
   it('should handle missing handovers directory', () => {
     const r = run();
     assert.equal(r.exitCode, 0);
+  });
+
+  it('should increment session counter', () => {
+    const r1 = run();
+    assert.match(r1.stdout, /Session #1/);
+
+    const r2 = run();
+    assert.match(r2.stdout, /Session #2/);
+  });
+
+  it('should create hook-log.md on first run', () => {
+    run();
+
+    const hookLog = resolve(tempDir, '.claude', 'learnings', 'hook-log.md');
+    const content = readFileSync(hookLog, 'utf8');
+    assert.match(content, /# Hook Execution Log/);
+    assert.match(content, /session-start/);
   });
 });

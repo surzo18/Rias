@@ -23,6 +23,7 @@ LEARNINGS_DIR="$PROJECT_DIR/.claude/learnings"
 mkdir -p "$LEARNINGS_DIR"
 
 DATE=$(date +%Y-%m-%d)
+HOOK_LOG="$LEARNINGS_DIR/hook-log.md"
 
 # Analyze transcript for learnings using node
 # Looks for concrete signals, NOT content of secrets/files
@@ -108,5 +109,10 @@ node -e "
     process.stderr.write('Recorded ' + total + ' learning(s) to patterns/decisions files\\n');
   }
 " "$TRANSCRIPT" "$LEARNINGS_DIR" "$DATE" 2>&1 || true
+
+# Log hook execution
+if [ -f "$HOOK_LOG" ]; then
+  printf '| %s | stop-learn | ok | analyzed transcript |\n' "$(date +'%Y-%m-%d %H:%M')" >> "$HOOK_LOG"
+fi
 
 exit 0

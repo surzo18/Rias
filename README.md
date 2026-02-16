@@ -31,7 +31,7 @@ tools/Rias/
 │   ├── settings.json        # Hooks, permissions (team-shared)
 │   ├── settings.local.json  # Personal overrides (gitignored)
 │   ├── hooks/               # Hook scripts
-│   │   ├── on-session-start.sh     # Load handover + learnings
+│   │   ├── on-session-start.sh     # Session counter, audit trigger, handover
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context (git state)
 │   │   ├── on-stop-learn.sh        # Persist learnings from transcript
@@ -46,16 +46,19 @@ tools/Rias/
 │   ├── skills/              # Claude Code skills
 │   │   ├── git-management/SKILL.md # Version-based workflow enforcement
 │   │   ├── reflect/SKILL.md        # Deep reflection trigger
-│   │   └── update-docs/SKILL.md    # Doc regeneration/validation
+│   │   ├── update-docs/SKILL.md    # Doc regeneration/validation
+│   │   └── audit-infra/SKILL.md   # Periodic infrastructure audit
 │   ├── agents/              # Custom subagent definitions
 │   │   └── reflector.md            # Learnings analysis agent
 │   ├── learnings/           # Auto-populated by hooks
 │   │   ├── mistakes.md             # Tool errors
 │   │   ├── patterns.md             # Discovered patterns
 │   │   ├── decisions.md            # Architecture decisions
-│   │   └── token-usage.md          # Session token consumption
+│   │   ├── token-usage.md          # Session token consumption
+│   │   └── hook-log.md             # Hook execution log
 │   ├── handovers/           # Session context (auto-managed)
 │   └── agent-memory/        # Persistent subagent memory
+│       └── session-counter.json   # Session count + audit tracking
 ├── test/                    # Hook tests (node:test runner)
 │   ├── helpers.js                  # Shared test helper (spawnSync)
 │   ├── setup.test.js               # Smoke test
@@ -85,6 +88,7 @@ Skills that enhance the Claude Code development workflow:
 | [git-management](docs/skills/index.md#git-management) | `/git-management` | Version-based git workflow enforcement |
 | [reflect](docs/skills/index.md#reflect) | `/reflect` | Deep reflection on learnings |
 | [update-docs](docs/skills/index.md#update-docs) | `/update-docs` | Regenerate and validate docs |
+| [audit-infra](docs/skills/index.md#audit-infra) | `/audit-infra` | Periodic infrastructure audit (8 areas) |
 
 ### OpenClaw Skills
 
@@ -111,13 +115,14 @@ The `post-edit-docs.sh` hook automatically reminds you to update docs when relev
 
 ## Architecture Pillars
 
-Rias is built on five pillars:
+Rias is built on six pillars:
 
 1. **Claude Integration** - `.claude/` infrastructure (hooks, rules, skills, agents)
 2. **Reflection** - Self-improvement system (learnings, handovers, token tracking, `/reflect`)
 3. **Versioning** - Version-based git workflow (`main → vX.Y.Z → feature/*`, `/git-management`)
 4. **Documentation** - Auto-updating docs (CHANGELOG, README, skill inventory)
 5. **Testing** - TDD with `node:test` built-in runner, mandatory RED-GREEN-REFACTOR cycle
+6. **Audit** - Periodic infrastructure audit every 100 sessions (`/audit-infra`), hook execution logging
 
 ## Git Workflow
 
