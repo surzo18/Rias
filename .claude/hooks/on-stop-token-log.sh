@@ -48,7 +48,8 @@ if [ "$TOTAL_RAW" -gt "$THRESHOLD" ] 2>/dev/null; then
 fi
 
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
-LOG_FILE="$CLAUDE_PROJECT_DIR/.claude/learnings/token-usage.md"
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
+LOG_FILE="$PROJECT_DIR/.claude/learnings/token-usage.md"
 
 # Create file with header if it doesn't exist
 if [ ! -f "$LOG_FILE" ]; then

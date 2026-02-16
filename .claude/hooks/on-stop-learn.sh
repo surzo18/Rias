@@ -36,17 +36,17 @@ node -e "
   const patterns = [];
   const decisions = [];
 
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     let obj;
     try { obj = JSON.parse(line); } catch { continue; }
 
     // Detect user corrections (user says 'no', 'wrong', 'nie', 'zle', 'nechcem')
     if (obj.type === 'human') {
       const text = JSON.stringify(obj.message || '').toLowerCase();
-      if (/\b(no[, .!]|wrong|nie[, .!]|zle|nechcem|preco si|prečo si|nemal by|shouldn.t)\b/.test(text)) {
+      if (/\b(no[, .!]|wrong|nope|nie[, .!]|zle|nechcem|preco si|prečo si|nemal by|shouldn\'t|that\'s not|should be)\b/.test(text)) {
         // Check if next assistant message exists (indicates correction happened)
-        const idx = lines.indexOf(line);
-        if (idx < lines.length - 1) {
+        if (i < lines.length - 1) {
           // Extract first 100 chars of user message for context
           const content = (typeof obj.message === 'string' ? obj.message : JSON.stringify(obj.message)).slice(0, 100);
           patterns.push('User correction detected: ' + content.replace(/[\\n\\r]/g, ' ').trim());
@@ -92,6 +92,16 @@ node -e "
     const entries = uniqDecisions.map(d => '### ' + date + '\\n' + d).join('\\n\\n');
     fs.appendFileSync(decisionsFile, '\\n' + entries + '\\n');
   }
+
+  // Bloat protection: warn if files exceed 100 lines
+  [learningsDir + '/patterns.md', learningsDir + '/decisions.md'].forEach(f => {
+    try {
+      const lines = fs.readFileSync(f, 'utf8').split('\\n').length;
+      if (lines > 100) {
+        process.stderr.write('BLOAT_WARNING: ' + f.split('/').pop() + ' has ' + lines + ' lines (soft limit: 100). Run /reflect to consolidate.\\n');
+      }
+    } catch {}
+  });
 
   const total = uniqPatterns.length + uniqDecisions.length;
   if (total > 0) {

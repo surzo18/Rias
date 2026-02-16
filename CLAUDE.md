@@ -105,8 +105,13 @@ tools/Rias/
 │   │   └── token-usage.md          # Session token consumption
 │   ├── handovers/           # Session context (auto-managed)
 │   └── agent-memory/        # Persistent subagent memory
-├── test/
-│   └── setup.test.js        # Smoke test (node:test runner)
+├── test/                    # Hook tests (node:test runner)
+│   ├── helpers.js                  # Shared test helper (spawnSync)
+│   ├── setup.test.js               # Smoke test
+│   ├── validate-git-ops.test.js    # Git validation tests
+│   ├── on-failure-learn.test.js    # Failure learning tests
+│   ├── on-stop-token-log.test.js   # Token logging tests
+│   └── post-edit-docs.test.js      # Doc reminder tests
 ├── docs/
 │   └── skills/
 │       └── index.md         # Skill inventory

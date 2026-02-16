@@ -1,6 +1,8 @@
 # Rias
 
-OpenClaw integration project. Builds skills, tools, and integrations for the [OpenClaw](https://docs.openclaw.ai) self-hosted AI gateway platform.
+## Overview
+
+OpenClaw integration project. Builds skills, tools, and integrations for the [OpenClaw](https://docs.openclaw.ai) self-hosted AI gateway platform. Rias provides Claude Code infrastructure (hooks, rules, skills), a self-improvement system, version-based git workflow, and automated documentation.
 
 ## Quick Start
 
@@ -27,12 +29,14 @@ npm run changelog
 tools/Rias/
 ├── .claude/
 │   ├── settings.json        # Hooks, permissions (team-shared)
+│   ├── settings.local.json  # Personal overrides (gitignored)
 │   ├── hooks/               # Hook scripts
 │   │   ├── on-session-start.sh     # Load handover + learnings
 │   │   ├── on-failure-learn.sh     # Record tool errors
-│   │   ├── on-compact-handover.sh  # Save session context
-│   │   ├── on-stop-token-log.sh    # Log token consumption
-│   │   ├── validate-git-ops.sh     # Git operation validation
+│   │   ├── on-compact-handover.sh  # Save session context (git state)
+│   │   ├── on-stop-learn.sh        # Persist learnings from transcript
+│   │   ├── on-stop-token-log.sh    # Log token consumption + threshold
+│   │   ├── validate-git-ops.sh     # Git validation + secret scanning
 │   │   └── post-edit-docs.sh       # Doc update reminders
 │   ├── rules/               # Auto-loaded project rules
 │   │   ├── openclaw-skills.md      # OpenClaw skill format rules
@@ -46,9 +50,19 @@ tools/Rias/
 │   ├── agents/              # Custom subagent definitions
 │   │   └── reflector.md            # Learnings analysis agent
 │   ├── learnings/           # Auto-populated by hooks
-│   └── handovers/           # Session context (auto-managed)
-├── test/
-│   └── setup.test.js        # Smoke test (node:test runner)
+│   │   ├── mistakes.md             # Tool errors
+│   │   ├── patterns.md             # Discovered patterns
+│   │   ├── decisions.md            # Architecture decisions
+│   │   └── token-usage.md          # Session token consumption
+│   ├── handovers/           # Session context (auto-managed)
+│   └── agent-memory/        # Persistent subagent memory
+├── test/                    # Hook tests (node:test runner)
+│   ├── helpers.js                  # Shared test helper (spawnSync)
+│   ├── setup.test.js               # Smoke test
+│   ├── validate-git-ops.test.js    # Git validation tests
+│   ├── on-failure-learn.test.js    # Failure learning tests
+│   ├── on-stop-token-log.test.js   # Token logging tests
+│   └── post-edit-docs.test.js      # Doc reminder tests
 ├── docs/
 │   └── skills/
 │       └── index.md         # Skill inventory

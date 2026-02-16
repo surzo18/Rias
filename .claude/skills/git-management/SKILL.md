@@ -76,6 +76,8 @@ git checkout -b hotfix/v0.1.1-fix-crash
 
 **Never** squash version branches into main - use `--no-ff` to preserve version history.
 
+**`--force-with-lease`:** Allowed ONLY when rebasing a personal feature branch that has already been pushed. Never use on shared branches (version branches or main). The validate hook blocks `--force` but permits `--force-with-lease`.
+
 **IMPORTANT:** Never merge a version branch to main automatically. The user decides when to release. Keep version branches alive until explicitly told to merge.
 
 ## Commit Messages

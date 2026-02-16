@@ -14,7 +14,7 @@ if [ -z "$FILE_PATH" ]; then
 fi
 
 # Normalize path separators
-FILE_PATH=$(echo "$FILE_PATH" | sed 's|\\|/|g')
+FILE_PATH=$(echo "$FILE_PATH" | tr '\\' '/')
 
 REMINDERS=""
 

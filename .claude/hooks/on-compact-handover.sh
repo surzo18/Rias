@@ -16,6 +16,12 @@ INPUT=$(cat)
 SESSION_ID=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.session_id||'unknown')}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
 TRIGGER=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.trigger||'unknown')}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
 
+# Capture actual git context
+GIT_BRANCH=$(cd "$PROJECT_DIR" && git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+GIT_STATUS=$(cd "$PROJECT_DIR" && git status --short 2>/dev/null | head -20 || echo "unable to determine")
+GIT_LOG=$(cd "$PROJECT_DIR" && git log --oneline -5 2>/dev/null || echo "unable to determine")
+UNCOMMITTED_COUNT=$(cd "$PROJECT_DIR" && git status --short 2>/dev/null | wc -l | tr -d ' ' || echo "0")
+
 cat > "$HANDOVER_FILE" << EOF
 # Session Handover - $TIMESTAMP
 
@@ -23,11 +29,20 @@ cat > "$HANDOVER_FILE" << EOF
 **Trigger:** $TRIGGER
 **Project:** Rias (OpenClaw integration)
 
-## Context
-Session was compacted. Key context from this session should be noted here.
+## Current State
 
-## Working On
-Check git status and recent commits for current work state.
+**Branch:** $GIT_BRANCH
+**Uncommitted changes:** $UNCOMMITTED_COUNT files
+
+### Modified files
+\`\`\`
+$GIT_STATUS
+\`\`\`
+
+### Recent commits
+\`\`\`
+$GIT_LOG
+\`\`\`
 
 ## Notes
 - Check \`.claude/learnings/\` for any new entries from this session

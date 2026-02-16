@@ -16,6 +16,14 @@ DATE=$(date +%Y-%m-%d)
 # Ensure learnings directory exists
 mkdir -p "$(dirname "$MISTAKES_FILE")"
 
+# Bloat protection: warn if file exceeds 100 lines
+if [ -f "$MISTAKES_FILE" ]; then
+  LINE_COUNT=$(wc -l < "$MISTAKES_FILE" 2>/dev/null || echo "0")
+  if [ "$LINE_COUNT" -gt 100 ] 2>/dev/null; then
+    echo "BLOAT_WARNING: mistakes.md has $LINE_COUNT lines (soft limit: 100). Run /reflect to consolidate." >&2
+  fi
+fi
+
 # Append to mistakes file
 cat >> "$MISTAKES_FILE" << EOF
 
