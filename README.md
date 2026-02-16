@@ -5,8 +5,14 @@ OpenClaw integration project. Builds skills, tools, and integrations for the [Op
 ## Quick Start
 
 ```bash
-# Install dependencies (zero-dependency by default, uses npx)
+# Install dependencies
 npm install
+
+# Run tests
+npm test
+
+# Watch mode
+npm run test:watch
 
 # Generate changelog from git history
 npm run changelog:init
@@ -25,20 +31,24 @@ tools/Rias/
 │   │   ├── on-session-start.sh     # Load handover + learnings
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context
+│   │   ├── on-stop-token-log.sh    # Log token consumption
 │   │   ├── validate-git-ops.sh     # Git operation validation
 │   │   └── post-edit-docs.sh       # Doc update reminders
 │   ├── rules/               # Auto-loaded project rules
 │   │   ├── openclaw-skills.md      # OpenClaw skill format rules
 │   │   ├── self-improvement.md     # Learning system rules
+│   │   ├── tdd.md                  # Node.js TDD rules
 │   │   └── documentation.md        # Doc format standards
 │   ├── skills/              # Claude Code skills
-│   │   ├── git-management/SKILL.md # Git workflow enforcement
+│   │   ├── git-management/SKILL.md # Version-based workflow enforcement
 │   │   ├── reflect/SKILL.md        # Deep reflection trigger
 │   │   └── update-docs/SKILL.md    # Doc regeneration/validation
 │   ├── agents/              # Custom subagent definitions
 │   │   └── reflector.md            # Learnings analysis agent
 │   ├── learnings/           # Auto-populated by hooks
 │   └── handovers/           # Session context (auto-managed)
+├── test/
+│   └── setup.test.js        # Smoke test (node:test runner)
 ├── docs/
 │   └── skills/
 │       └── index.md         # Skill inventory
@@ -58,7 +68,7 @@ Skills that enhance the Claude Code development workflow:
 
 | Skill | Command | Purpose |
 |-------|---------|---------|
-| [git-management](docs/skills/index.md#git-management) | `/git-management` | Git workflow enforcement |
+| [git-management](docs/skills/index.md#git-management) | `/git-management` | Version-based git workflow enforcement |
 | [reflect](docs/skills/index.md#reflect) | `/reflect` | Deep reflection on learnings |
 | [update-docs](docs/skills/index.md#update-docs) | `/update-docs` | Regenerate and validate docs |
 
@@ -87,12 +97,29 @@ The `post-edit-docs.sh` hook automatically reminds you to update docs when relev
 
 ## Architecture Pillars
 
-Rias is built on four pillars:
+Rias is built on five pillars:
 
 1. **Claude Integration** - `.claude/` infrastructure (hooks, rules, skills, agents)
-2. **Reflection** - Self-improvement system (learnings, handovers, `/reflect`)
-3. **Versioning** - Git workflow enforcement (`/git-management`, pre-tool hooks)
+2. **Reflection** - Self-improvement system (learnings, handovers, token tracking, `/reflect`)
+3. **Versioning** - Version-based git workflow (`main → vX.Y.Z → feature/*`, `/git-management`)
 4. **Documentation** - Auto-updating docs (CHANGELOG, README, skill inventory)
+5. **Testing** - TDD with `node:test` built-in runner, mandatory RED-GREEN-REFACTOR cycle
+
+## Git Workflow
+
+Rias uses version-based branching:
+
+```
+main (stable, tagged releases only)
+  └── vX.Y.Z (version branch, all development here)
+        ├── feature/*   (squash merge → vX.Y.Z)
+        ├── bugfix/*    (squash merge → vX.Y.Z)
+        └── merge --no-ff → main + tag vX.Y.Z
+```
+
+- Work branches are created from version branches, not main
+- Version branches are merged to main with `--no-ff` and tagged
+- Hotfixes branch from main at a tag: `hotfix/vX.Y.Z-description`
 
 ## OpenClaw Reference
 

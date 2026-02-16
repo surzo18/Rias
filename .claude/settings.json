@@ -2,12 +2,44 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
 
   "permissions": {
+    "allow": [
+      "Bash(npm test*)",
+      "Bash(npm run *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(git status*)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git branch*)",
+      "Bash(git tag *)",
+      "Bash(git merge *)",
+      "Bash(git push -u *)",
+      "Bash(git push origin *)",
+      "Bash(git stash*)",
+      "Bash(gh pr *)",
+      "Bash(gh issue *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(mkdir *)",
+      "Bash(cat *)",
+      "Bash(conventional-changelog *)",
+      "Bash(cd *)"
+    ],
     "deny": [
       "Bash(git push --force *)",
+      "Bash(git push --force)",
       "Bash(git reset --hard *)",
       "Bash(git checkout . *)",
+      "Bash(git checkout .)",
       "Bash(git clean -f *)",
-      "Bash(rm -rf *)"
+      "Bash(git clean -f)",
+      "Bash(rm -rf *)",
+      "Bash(npm publish *)",
+      "Bash(npm publish)"
     ]
   },
 
@@ -80,6 +112,12 @@
             "prompt": "Review your last response. Did you: (1) get corrected by the user, (2) discover a new pattern or convention, (3) make an architectural decision, or (4) learn something notable about OpenClaw or this project? If YES to any, respond with JSON: {\"ok\": false, \"reason\": \"LEARNING: <category>: <concise description>\"} where category is 'mistake', 'pattern', or 'decision'. If nothing notable, respond {\"ok\": true}.",
             "model": "haiku",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-stop-token-log.sh\"",
+            "timeout": 10,
+            "statusMessage": "Logging token usage..."
           }
         ]
       }

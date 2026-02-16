@@ -6,10 +6,12 @@ All Claude Code skills available in the Rias project.
 
 - **Command:** `/git-management`
 - **File:** `.claude/skills/git-management/SKILL.md`
-- **Description:** Enforces correct git workflow for the Rias project. Mandatory before creating branches, committing, creating PRs, or merging.
+- **Description:** Enforces version-based git workflow for the Rias project. Mandatory before creating branches, committing, creating PRs, or merging. Implements `main → vX.Y.Z → feature/*` branching model.
 - **Key behaviors:**
-  - Validates branch naming conventions (feature/, bugfix/, hotfix/, etc.)
+  - Validates branch naming (vX.Y.Z, feature/, bugfix/, hotfix/vX.Y.Z-*, etc.)
+  - Warns when creating work branches from main instead of version branches
   - Enforces conventional commit message format
+  - Provides version branch lifecycle and release checklist
   - Runs pre-commit infrastructure sync checklist
   - Provides PR creation template
 
@@ -17,11 +19,12 @@ All Claude Code skills available in the Rias project.
 
 - **Command:** `/reflect`
 - **File:** `.claude/skills/reflect/SKILL.md`
-- **Description:** Triggers deep reflection on accumulated learnings. Identifies repeated patterns, proposes new rules, promotes key insights, and cleans up stale entries.
+- **Description:** Triggers deep reflection on accumulated learnings. Identifies repeated patterns, proposes new rules, promotes key insights, analyzes token usage, and cleans up stale entries.
 - **Key behaviors:**
-  - Analyzes `.claude/learnings/` directory (mistakes, patterns, decisions)
+  - Analyzes `.claude/learnings/` directory (mistakes, patterns, decisions, token usage)
   - Patterns with 3+ occurrences become rule proposals
   - Promotes insights to CLAUDE.md
+  - Analyzes token consumption trends and flags high-usage sessions
   - Dispatches to reflector subagent
 
 ## update-docs

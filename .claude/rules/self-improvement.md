@@ -17,11 +17,26 @@ The hooks system captures learnings automatically:
 | Patterns | `learnings/patterns.md` | Stop hook detects pattern (automatic) |
 | Decisions | `learnings/decisions.md` | Stop hook detects decision (automatic) |
 
+## Token Tracking
+
+The Stop hook logs token consumption from each session:
+
+- **Hook:** `on-stop-token-log.sh` (command type, runs alongside prompt hook)
+- **Log file:** `learnings/token-usage.md`
+- **Data:** input tokens, output tokens, total, turn count per session
+- **Source:** Parsed from transcript JSONL (`usage` objects in assistant messages)
+
+The `/reflect` command analyzes token usage for patterns:
+- High-usage sessions (>100k tokens) flagged for review
+- Trends over time (increasing/decreasing per-session usage)
+- Correlation between turn count and token consumption
+
 ## Manual Reflection
 
 Use `/reflect` to trigger deep analysis:
 - Identifies repeated patterns (3+ → propose new rule)
 - Promotes key insights to CLAUDE.md
+- Analyzes token usage trends
 - Cleans up stale/duplicate entries
 
 ## Bloat Protection

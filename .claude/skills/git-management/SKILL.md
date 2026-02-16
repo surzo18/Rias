@@ -1,35 +1,80 @@
 ---
 name: git-management
-description: Use before ANY git operation (branch, commit, PR, merge) in the Rias project to enforce workflow conventions and Claude infrastructure sync.
+description: Use before ANY git operation (branch, commit, PR, merge) in the Rias project to enforce version-based workflow conventions and Claude infrastructure sync.
 user-invocable: true
 argument-hint: "[branch-name|commit-message]"
 ---
 
 # Git Management - Rias
 
-Enforce correct git workflow for the Rias project. This skill is MANDATORY before creating branches, committing, creating PRs, or merging.
+Enforce correct version-based git workflow for the Rias project. This skill is MANDATORY before creating branches, committing, creating PRs, or merging.
+
+## Branch Model
+
+```
+main (stable, tagged releases only)
+  │
+  ├── v0.1.0 (version branch, all v0.1.0 work goes here)
+  │     ├── feature/add-skill-x     (squash merge → v0.1.0)
+  │     └── bugfix/fix-hook          (squash merge → v0.1.0)
+  │     └── merge --no-ff → main + tag v0.1.0
+  │
+  └── v0.2.0 (next version, created from main after v0.1.0 release)
+        ├── feature/gateway-integ    (squash merge → v0.2.0)
+        └── ...
+```
 
 ## Branch Creation
 
-Before creating any branch, validate the name:
+### Version branches (from main only)
 
-**Allowed prefixes:**
-- `feature/<name>` - New functionality
-- `bugfix/<name>` - Bug fix
-- `hotfix/<name>` - Urgent production fix
-- `refactor/<name>` - Code refactoring
-- `test/<name>` - Test additions
-- `docs/<name>` - Documentation
+```bash
+git checkout main
+git checkout -b v0.2.0
+```
+
+### Work branches (from vX.Y.Z only)
+
+```bash
+git checkout v0.1.0
+git checkout -b feature/add-gateway-skill
+```
+
+### Hotfix branches (from main at a tag)
+
+```bash
+git checkout main
+git checkout -b hotfix/v0.1.1-fix-crash
+```
+
+### Allowed branch patterns
+
+| Pattern | Example | Origin |
+|---------|---------|--------|
+| `vX.Y.Z` | `v0.2.0` | From `main` |
+| `feature/<name>` | `feature/add-skill` | From `vX.Y.Z` |
+| `bugfix/<name>` | `bugfix/fix-hook` | From `vX.Y.Z` |
+| `refactor/<name>` | `refactor/cleanup` | From `vX.Y.Z` |
+| `test/<name>` | `test/add-hooks` | From `vX.Y.Z` |
+| `docs/<name>` | `docs/update-readme` | From `vX.Y.Z` |
+| `hotfix/vX.Y.Z-<desc>` | `hotfix/v0.1.1-fix-crash` | From `main` (at tag) |
 
 **Rules:**
-- Lowercase with hyphens only (e.g., `feature/add-gateway-skill`)
+- Lowercase with hyphens only
 - No uppercase, underscores, or spaces
-- Descriptive but concise name
+- Work branches MUST originate from a version branch, NOT from main
+- Hotfix branches MUST originate from main
 
-**Command:**
-```bash
-cd /d/REPOS/tools/Rias && git checkout -b <prefix>/<name>
-```
+## Merge Strategies
+
+| Source → Target | Strategy | Command |
+|----------------|----------|---------|
+| `feature/*` → `vX.Y.Z` | Squash merge | `git merge --squash feature/name && git commit` |
+| `bugfix/*` → `vX.Y.Z` | Squash merge | `git merge --squash bugfix/name && git commit` |
+| `vX.Y.Z` → `main` | Merge commit | `git merge --no-ff vX.Y.Z` |
+| `hotfix/*` → `main` | Merge commit | `git merge --no-ff hotfix/name` |
+
+**Never** squash version branches into main - use `--no-ff` to preserve version history.
 
 ## Commit Messages
 
@@ -53,6 +98,69 @@ cd /d/REPOS/tools/Rias && git checkout -b <prefix>/<name>
   )"
   ```
 
+## Version Branch Lifecycle
+
+### 1. Create version branch
+
+```bash
+git checkout main
+git checkout -b vX.Y.Z
+```
+
+### 2. Develop features
+
+```bash
+git checkout vX.Y.Z
+git checkout -b feature/my-feature
+# ... work ...
+git checkout vX.Y.Z
+git merge --squash feature/my-feature
+git commit -m "feat: add my feature"
+git branch -d feature/my-feature
+```
+
+### 3. Release
+
+Follow the release checklist below.
+
+### 4. Clean up
+
+```bash
+git branch -d vX.Y.Z
+```
+
+## Release Checklist
+
+Before merging a version branch to main:
+
+1. **Tests pass:** `npm test` returns all green
+2. **Changelog generated:** `npm run changelog`
+3. **Docs updated:** README, CLAUDE.md, docs/skills/index.md reflect changes
+4. **Version in package.json** matches branch name
+5. **Merge to main:**
+   ```bash
+   git checkout main
+   git merge --no-ff vX.Y.Z
+   ```
+6. **Tag the merge commit:**
+   ```bash
+   git tag vX.Y.Z
+   ```
+7. **Delete version branch:**
+   ```bash
+   git branch -d vX.Y.Z
+   ```
+
+## Hotfix Process
+
+For urgent fixes to a released version:
+
+1. Branch from main: `git checkout -b hotfix/vX.Y.Z-description`
+2. Fix the issue, add tests
+3. Update version in package.json (patch bump)
+4. Run release checklist (tests, changelog, docs)
+5. Merge to main with `--no-ff`, tag, delete branch
+
 ## Pre-Commit Infrastructure Sync Checklist
 
 **BEFORE every commit**, check if any of these files need updating:
@@ -61,10 +169,13 @@ cd /d/REPOS/tools/Rias && git checkout -b <prefix>/<name>
 
 | Trigger | Update |
 |---------|--------|
-| New OpenClaw skill added | `tools/Rias/CLAUDE.md` (project structure) |
-| Stack decision made | `tools/Rias/CLAUDE.md` (stack, build commands) |
-| New dependency added | `tools/Rias/CLAUDE.md` (stack section) |
-| Architecture change | `tools/Rias/CLAUDE.md` (project structure, conventions) |
+| New OpenClaw skill added | `CLAUDE.md` (project structure) |
+| Stack decision made | `CLAUDE.md` (stack, build commands) |
+| New dependency added | `CLAUDE.md` (stack section) |
+| Architecture change | `CLAUDE.md` (project structure, conventions) |
+| New hook added/changed | `CLAUDE.md` hooks table + `settings.json` |
+| New rule added | `CLAUDE.md` project structure tree |
+| New test file added | `CLAUDE.md` project structure tree |
 
 ### Documentation files
 
@@ -73,7 +184,7 @@ cd /d/REPOS/tools/Rias && git checkout -b <prefix>/<name>
 | New skill added/removed | `docs/skills/index.md` + `README.md` skills table |
 | New npm script added | `README.md` quick start + `CLAUDE.md` build commands |
 | Project structure changed | `README.md` structure tree + `CLAUDE.md` structure tree |
-| New hook added/changed | `CLAUDE.md` hooks table + `settings.json` |
+| Version released | `README.md` + CHANGELOG.md (via `npm run changelog`) |
 
 ### Root workspace files
 
@@ -124,18 +235,20 @@ EOF
 )"
 ```
 
-## Merge Strategy
-
-- **Squash merge** to main branch
-- **Never force push** (`--force`). Use `--force-with-lease` only if absolutely necessary
-- **Never push directly to main** - use Pull Requests
-- Before merge, verify all infra sync checklist items are done
-
 ## Quick Reference
 
 ```bash
-# Create branch
-git checkout -b feature/my-feature
+# Create version branch
+git checkout main && git checkout -b v0.2.0
+
+# Create feature branch from version
+git checkout v0.2.0 && git checkout -b feature/my-feature
+
+# Squash merge feature into version
+git checkout v0.2.0 && git merge --squash feature/my-feature && git commit
+
+# Release version to main
+git checkout main && git merge --no-ff v0.2.0 && git tag v0.2.0 && git branch -d v0.2.0
 
 # Stage specific files (prefer over git add -A)
 git add path/to/file1 path/to/file2
@@ -149,8 +262,5 @@ EOF
 )"
 
 # Push with upstream tracking
-git push -u origin feature/my-feature
-
-# Create PR
-gh pr create --title "feat: add gateway health check" --body "..."
+git push -u origin v0.2.0
 ```

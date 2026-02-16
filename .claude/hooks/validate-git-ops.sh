@@ -20,7 +20,7 @@ fi
 
 # Block direct push to main
 if echo "$COMMAND" | grep -qE "git push.*\b(origin|upstream)\s+main\b"; then
-  echo "BLOCKED: Direct push to main is not allowed. Use a feature branch and PR." >&2
+  echo "BLOCKED: Direct push to main is not allowed. Merge version branches with --no-ff." >&2
   exit 2
 fi
 
@@ -34,9 +34,31 @@ fi
 if echo "$COMMAND" | grep -qE "git checkout -b|git switch -c"; then
   BRANCH=$(echo "$COMMAND" | sed -n 's/.*\(checkout -b\|switch -c\) \+\([^ ]*\).*/\2/p')
   if [ -n "$BRANCH" ]; then
-    if ! echo "$BRANCH" | grep -qE "^(feature|bugfix|hotfix|refactor|test|docs)/[a-z0-9-]+$"; then
-      echo "WARNING: Branch name '$BRANCH' should follow pattern: <prefix>/<lowercase-with-hyphens>" >&2
-      echo "Allowed prefixes: feature/, bugfix/, hotfix/, refactor/, test/, docs/" >&2
+    # Valid patterns: vX.Y.Z, feature/*, bugfix/*, refactor/*, test/*, docs/*, hotfix/vX.Y.Z-*
+    if ! echo "$BRANCH" | grep -qE "^(v[0-9]+\.[0-9]+\.[0-9]+|(feature|bugfix|refactor|test|docs)/[a-z0-9-]+|hotfix/v[0-9]+\.[0-9]+\.[0-9]+-[a-z0-9-]+)$"; then
+      echo "WARNING: Branch name '$BRANCH' does not match allowed patterns:" >&2
+      echo "  vX.Y.Z                          (version branch from main)" >&2
+      echo "  feature/<name>                  (from vX.Y.Z)" >&2
+      echo "  bugfix/<name>                   (from vX.Y.Z)" >&2
+      echo "  refactor/<name>                 (from vX.Y.Z)" >&2
+      echo "  test/<name>                     (from vX.Y.Z)" >&2
+      echo "  docs/<name>                     (from vX.Y.Z)" >&2
+      echo "  hotfix/vX.Y.Z-<desc>            (from main at tag)" >&2
+    fi
+
+    # Warn if creating a work branch from main (should be from vX.Y.Z)
+    CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+    if [ "$CURRENT_BRANCH" = "main" ] || [ "$CURRENT_BRANCH" = "master" ]; then
+      if echo "$BRANCH" | grep -qE "^(feature|bugfix|refactor|test|docs)/"; then
+        echo "WARNING: Creating work branch '$BRANCH' from $CURRENT_BRANCH. Should branch from a vX.Y.Z version branch instead." >&2
+      fi
+    fi
+
+    # Warn if creating hotfix from non-main
+    if echo "$BRANCH" | grep -qE "^hotfix/"; then
+      if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "master" ]; then
+        echo "WARNING: Creating hotfix branch '$BRANCH' from $CURRENT_BRANCH. Hotfixes should branch from main at a tag." >&2
+      fi
     fi
   fi
 fi
