@@ -36,10 +36,16 @@ RESULT=$(node -e "
   const total = inputTokens + outputTokens;
   if (total === 0) { process.exit(1); }
   const fmt = n => n.toLocaleString();
-  console.log([fmt(inputTokens), fmt(outputTokens), fmt(total), turns].join('|'));
+  console.log([fmt(inputTokens), fmt(outputTokens), fmt(total), turns, total].join('|'));
 " "$TRANSCRIPT" 2>/dev/null) || exit 0
 
-IFS='|' read -r INPUT_FMT OUTPUT_FMT TOTAL_FMT TURNS <<< "$RESULT"
+IFS='|' read -r INPUT_FMT OUTPUT_FMT TOTAL_FMT TURNS TOTAL_RAW <<< "$RESULT"
+
+# Threshold alert
+THRESHOLD=100000
+if [ "$TOTAL_RAW" -gt "$THRESHOLD" ] 2>/dev/null; then
+  echo "TOKEN_WARNING: Session used $TOTAL_FMT tokens (threshold: $(node -e "console.log(($THRESHOLD).toLocaleString())")). Consider if this was efficient." >&2
+fi
 
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
 LOG_FILE="$CLAUDE_PROJECT_DIR/.claude/learnings/token-usage.md"

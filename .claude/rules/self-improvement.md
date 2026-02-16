@@ -5,7 +5,8 @@
 The hooks system captures learnings automatically:
 
 - **PostToolUseFailure** → records errors to `learnings/mistakes.md`
-- **Stop** → prompt hook evaluates if anything notable happened
+- **Stop** → `on-stop-learn.sh` parses transcript for corrections/patterns/decisions
+- **Stop** → `on-stop-token-log.sh` logs token consumption (alerts if >100k)
 - **PreCompact** → saves session context to `handovers/`
 - **SessionStart** → loads latest handover + learnings summary
 
@@ -22,7 +23,8 @@ The hooks system captures learnings automatically:
 
 The Stop hook logs token consumption from each session:
 
-- **Hook:** `on-stop-token-log.sh` (command type, runs alongside prompt hook)
+- **Hook:** `on-stop-token-log.sh` (command type, runs alongside learnings hook)
+- **Threshold:** Sessions exceeding 100k tokens trigger a warning
 - **Log file:** `learnings/token-usage.md`
 - **Data:** input tokens, output tokens, total, turn count per session
 - **Source:** Parsed from transcript JSONL (`usage` objects in assistant messages)

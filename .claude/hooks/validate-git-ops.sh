@@ -30,6 +30,28 @@ if echo "$COMMAND" | grep -qE "git reset --hard"; then
   exit 2
 fi
 
+# Block committing files with secret-like names (NEVER reads file content)
+if echo "$COMMAND" | grep -qE "^git commit"; then
+  DANGEROUS_FILES=$(git diff --cached --name-only 2>/dev/null | grep -iE '\.env($|\.)|\.key$|\.pem$|\.p12$|\.pfx$|credentials|secret|\.secret|api.?key|token\.json|\.keystore$' || true)
+  if [ -n "$DANGEROUS_FILES" ]; then
+    echo "BLOCKED: Staged files may contain secrets (checked filenames only, never content):" >&2
+    echo "$DANGEROUS_FILES" | while read -r f; do echo "  - $f" >&2; done
+    echo "Remove them with: git reset HEAD <file>" >&2
+    exit 2
+  fi
+fi
+
+# Block adding files with secret-like names directly
+if echo "$COMMAND" | grep -qE "^git add"; then
+  # Extract file arguments (skip flags)
+  ADDED_FILES=$(echo "$COMMAND" | sed 's/^git add //' | tr ' ' '\n' | grep -v '^-' || true)
+  DANGEROUS_ADDS=$(echo "$ADDED_FILES" | grep -iE '\.env($|\.)|\.key$|\.pem$|\.p12$|\.pfx$|credentials|secret|\.secret|api.?key|token\.json|\.keystore$' || true)
+  if [ -n "$DANGEROUS_ADDS" ]; then
+    echo "WARNING: Adding files that may contain secrets (checked filenames only, never content):" >&2
+    echo "$DANGEROUS_ADDS" | while read -r f; do echo "  - $f" >&2; done
+  fi
+fi
+
 # Validate branch name on checkout -b / switch -c
 if echo "$COMMAND" | grep -qE "git checkout -b|git switch -c"; then
   BRANCH=$(echo "$COMMAND" | sed -n 's/.*\(checkout -b\|switch -c\) \+\([^ ]*\).*/\2/p')

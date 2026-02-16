@@ -108,10 +108,10 @@
       {
         "hooks": [
           {
-            "type": "prompt",
-            "prompt": "Review your last response. Did you: (1) get corrected by the user, (2) discover a new pattern or convention, (3) make an architectural decision, or (4) learn something notable about OpenClaw or this project? If YES to any, respond with JSON: {\"ok\": false, \"reason\": \"LEARNING: <category>: <concise description>\"} where category is 'mistake', 'pattern', or 'decision'. If nothing notable, respond {\"ok\": true}.",
-            "model": "haiku",
-            "timeout": 15
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/on-stop-learn.sh\"",
+            "timeout": 15,
+            "statusMessage": "Analyzing session for learnings..."
           },
           {
             "type": "command",

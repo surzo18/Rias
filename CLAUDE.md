@@ -83,8 +83,9 @@ tools/Rias/
 │   │   ├── on-session-start.sh     # Load handover + learnings
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context
-│   │   ├── on-stop-token-log.sh    # Log token consumption
-│   │   ├── validate-git-ops.sh     # Git operation validation
+│   │   ├── on-stop-learn.sh         # Persist learnings from transcript
+│   │   ├── on-stop-token-log.sh    # Log token consumption + threshold
+│   │   ├── validate-git-ops.sh     # Git validation + secret scanning
 │   │   └── post-edit-docs.sh       # Doc update reminders
 │   ├── rules/               # Auto-loaded project rules
 │   │   ├── openclaw-skills.md      # OpenClaw skill format rules
@@ -126,10 +127,10 @@ Automatic learning via Claude Code hooks:
 | SessionStart | `on-session-start.sh` | Load latest handover, clean old ones, summarize learnings |
 | PostToolUseFailure | `on-failure-learn.sh` | Record tool errors to `learnings/mistakes.md` |
 | PostToolUse (Write\|Edit) | `post-edit-docs.sh` | Remind to update docs when relevant files change |
-| Stop (prompt) | prompt hook (haiku) | Evaluate if anything notable happened, record to learnings |
-| Stop (command) | `on-stop-token-log.sh` | Log token consumption from transcript JSONL |
+| Stop (command) | `on-stop-learn.sh` | Parse transcript for corrections, patterns, decisions → persist to learnings/ |
+| Stop (command) | `on-stop-token-log.sh` | Log token consumption, alert if >100k tokens |
 | PreCompact | `on-compact-handover.sh` | Save session context before compaction |
-| PreToolUse (Bash) | `validate-git-ops.sh` | Block force push, validate version-based branch names |
+| PreToolUse (Bash) | `validate-git-ops.sh` | Block force push, secret scanning, validate branch names |
 
 Manual: `/reflect` triggers the reflector agent for deep analysis (including token usage patterns).
 
