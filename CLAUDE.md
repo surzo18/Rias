@@ -80,7 +80,7 @@ tools/Rias/
 │   │   ├── on-session-start.sh     # Load handover + learnings
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context
-│   │   └── pre-commit.sh           # Git operation validation
+│   │   └── validate-git-ops.sh     # Git operation validation
 │   ├── rules/               # Auto-loaded project rules
 │   │   ├── openclaw-skills.md      # OpenClaw skill format rules
 │   │   └── self-improvement.md     # Learning system rules
@@ -110,7 +110,7 @@ Automatic learning via Claude Code hooks:
 | PostToolUseFailure | `on-failure-learn.sh` | Record tool errors to `learnings/mistakes.md` |
 | Stop | prompt hook (haiku) | Evaluate if anything notable happened, record to learnings |
 | PreCompact | `on-compact-handover.sh` | Save session context before compaction |
-| PreToolUse (Bash) | `pre-commit.sh` | Block force push, validate branch names, check commit format |
+| PreToolUse (Bash) | `validate-git-ops.sh` | Block force push, validate branch names |
 
 Manual: `/reflect` triggers the reflector agent for deep analysis.
 
