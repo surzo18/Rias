@@ -11,7 +11,10 @@
     ]
   },
 
-  "includeCoAuthoredBy": true,
+  "attribution": {
+    "commit": "Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>",
+    "pr": "Generated with [Claude Code](https://claude.com/claude-code)"
+  },
 
   "hooks": {
     "SessionStart": [
@@ -47,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/pre-commit.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/validate-git-ops.sh\"",
             "timeout": 10,
             "statusMessage": "Validating git operation..."
           }

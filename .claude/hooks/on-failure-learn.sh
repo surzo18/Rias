@@ -8,8 +8,9 @@ MISTAKES_FILE="$PROJECT_DIR/.claude/learnings/mistakes.md"
 # Read JSON from stdin
 INPUT=$(cat)
 
-TOOL_NAME=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_name','unknown'))" 2>/dev/null || echo "unknown")
-ERROR_MSG=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('tool_error', d.get('error','unknown'))[:200])" 2>/dev/null || echo "unknown")
+# Parse JSON with node (guaranteed available - Rias is a Node.js project)
+TOOL_NAME=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.tool_name||'unknown')}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
+ERROR_MSG=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log((j.error||'unknown').slice(0,200))}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
 DATE=$(date +%Y-%m-%d)
 
 # Append to mistakes file

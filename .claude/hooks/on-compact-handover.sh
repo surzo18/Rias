@@ -9,15 +9,18 @@ HANDOVER_FILE="$HANDOVERS_DIR/handover-$TIMESTAMP.md"
 
 mkdir -p "$HANDOVERS_DIR"
 
-# Read JSON from stdin for context
+# Read JSON from stdin
 INPUT=$(cat)
 
-SESSION_ID=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('session_id','unknown'))" 2>/dev/null || echo "unknown")
+# Parse JSON with node (guaranteed available - Rias is a Node.js project)
+SESSION_ID=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.session_id||'unknown')}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
+TRIGGER=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log(j.trigger||'unknown')}catch{console.log('unknown')}})" 2>/dev/null || echo "unknown")
 
 cat > "$HANDOVER_FILE" << EOF
 # Session Handover - $TIMESTAMP
 
 **Session:** $SESSION_ID
+**Trigger:** $TRIGGER
 **Project:** Rias (OpenClaw integration)
 
 ## Context

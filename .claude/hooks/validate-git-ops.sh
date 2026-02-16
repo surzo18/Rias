@@ -2,10 +2,10 @@
 # PreToolUse hook for Bash: Validate git operations
 set -euo pipefail
 
-# Read JSON from stdin
+# Read JSON from stdin, parse with node (guaranteed available)
 INPUT=$(cat)
 
-COMMAND=$(echo "$INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('tool_input',{}).get('command',''))" 2>/dev/null || echo "")
+COMMAND=$(echo "$INPUT" | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const j=JSON.parse(d);console.log((j.tool_input&&j.tool_input.command)||'')}catch{console.log('')}})" 2>/dev/null || echo "")
 
 # Only check git commands
 if ! echo "$COMMAND" | grep -q "^git "; then
@@ -30,27 +30,13 @@ if echo "$COMMAND" | grep -qE "git reset --hard"; then
   exit 2
 fi
 
-# Validate commit message format (conventional commits)
-if echo "$COMMAND" | grep -qE "git commit.*-m"; then
-  # Extract the commit message
-  MSG=$(echo "$COMMAND" | sed -n "s/.*-m [\"']\?\(.*\)[\"']\?/\1/p" | head -1)
-  if [ -n "$MSG" ]; then
-    # Check for conventional commit prefix
-    if ! echo "$MSG" | grep -qE "^\$\(cat|^(feat|fix|refactor|test|docs|style|chore|perf|ci|build|revert)(\(.*\))?: "; then
-      echo "WARNING: Commit message may not follow conventional commits format: <type>(scope): <description>" >&2
-      # Don't block, just warn (exit 0)
-    fi
-  fi
-fi
-
-# Validate branch name on checkout -b
+# Validate branch name on checkout -b / switch -c
 if echo "$COMMAND" | grep -qE "git checkout -b|git switch -c"; then
   BRANCH=$(echo "$COMMAND" | sed -n 's/.*\(checkout -b\|switch -c\) \+\([^ ]*\).*/\2/p')
   if [ -n "$BRANCH" ]; then
     if ! echo "$BRANCH" | grep -qE "^(feature|bugfix|hotfix|refactor|test|docs)/[a-z0-9-]+$"; then
       echo "WARNING: Branch name '$BRANCH' should follow pattern: <prefix>/<lowercase-with-hyphens>" >&2
       echo "Allowed prefixes: feature/, bugfix/, hotfix/, refactor/, test/, docs/" >&2
-      # Don't block, just warn
     fi
   fi
 fi
