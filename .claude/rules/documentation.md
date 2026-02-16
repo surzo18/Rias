@@ -38,3 +38,7 @@
 | New npm script | README.md quick start section |
 | Structure change | README.md project structure tree + CLAUDE.md |
 | Breaking change | README.md + CHANGELOG.md (via `npm run changelog`) |
+| Version released | README.md + CHANGELOG.md (via `npm run changelog`) |
+| New hook added | CLAUDE.md hooks table + README.md structure tree |
+| New rule added | CLAUDE.md project structure tree |
+| New test file | CLAUDE.md project structure tree |

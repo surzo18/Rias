@@ -58,6 +58,7 @@ Additional dirs via `skills.load.extraDirs` in `~/.openclaw/openclaw.json`.
 ## Stack
 
 - **Runtime:** Node.js 22+
+- **Test runner:** `node:test` (built-in, zero dependencies)
 - **Platform:** OpenClaw Gateway (WebSocket + HTTP, default port 18789)
 - **Related project:** `tools/esdeath/` runs the OpenClaw assistant instance (Telegram + TTS)
 
@@ -65,7 +66,8 @@ Additional dirs via `skills.load.extraDirs` in `~/.openclaw/openclaw.json`.
 
 ```bash
 npm install                  # Install dependencies
-npm test                     # Run tests (TBD)
+npm test                     # Run all tests (node --test)
+npm run test:watch           # Watch mode (node --test --watch)
 npm run changelog            # Regenerate CHANGELOG.md (append new)
 npm run changelog:init       # Regenerate CHANGELOG.md (full rebuild)
 ```
@@ -81,14 +83,16 @@ tools/Rias/
 │   │   ├── on-session-start.sh     # Load handover + learnings
 │   │   ├── on-failure-learn.sh     # Record tool errors
 │   │   ├── on-compact-handover.sh  # Save session context
+│   │   ├── on-stop-token-log.sh    # Log token consumption
 │   │   ├── validate-git-ops.sh     # Git operation validation
 │   │   └── post-edit-docs.sh       # Doc update reminders
 │   ├── rules/               # Auto-loaded project rules
 │   │   ├── openclaw-skills.md      # OpenClaw skill format rules
 │   │   ├── self-improvement.md     # Learning system rules
+│   │   ├── tdd.md                  # Node.js TDD rules (overrides root)
 │   │   └── documentation.md        # Doc format standards
 │   ├── skills/              # Claude Code skills
-│   │   ├── git-management/SKILL.md # Git workflow enforcement
+│   │   ├── git-management/SKILL.md # Version-based workflow enforcement
 │   │   ├── reflect/SKILL.md        # Deep reflection trigger
 │   │   └── update-docs/SKILL.md    # Doc regeneration/validation
 │   ├── agents/              # Custom subagent definitions
@@ -96,9 +100,12 @@ tools/Rias/
 │   ├── learnings/           # Auto-populated by hooks
 │   │   ├── mistakes.md             # Tool errors
 │   │   ├── patterns.md             # Discovered patterns
-│   │   └── decisions.md            # Architecture decisions
+│   │   ├── decisions.md            # Architecture decisions
+│   │   └── token-usage.md          # Session token consumption
 │   ├── handovers/           # Session context (auto-managed)
 │   └── agent-memory/        # Persistent subagent memory
+├── test/
+│   └── setup.test.js        # Smoke test (node:test runner)
 ├── docs/
 │   └── skills/
 │       └── index.md         # Skill inventory
@@ -119,15 +126,32 @@ Automatic learning via Claude Code hooks:
 | SessionStart | `on-session-start.sh` | Load latest handover, clean old ones, summarize learnings |
 | PostToolUseFailure | `on-failure-learn.sh` | Record tool errors to `learnings/mistakes.md` |
 | PostToolUse (Write\|Edit) | `post-edit-docs.sh` | Remind to update docs when relevant files change |
-| Stop | prompt hook (haiku) | Evaluate if anything notable happened, record to learnings |
+| Stop (prompt) | prompt hook (haiku) | Evaluate if anything notable happened, record to learnings |
+| Stop (command) | `on-stop-token-log.sh` | Log token consumption from transcript JSONL |
 | PreCompact | `on-compact-handover.sh` | Save session context before compaction |
-| PreToolUse (Bash) | `validate-git-ops.sh` | Block force push, validate branch names |
+| PreToolUse (Bash) | `validate-git-ops.sh` | Block force push, validate version-based branch names |
 
-Manual: `/reflect` triggers the reflector agent for deep analysis.
+Manual: `/reflect` triggers the reflector agent for deep analysis (including token usage patterns).
+
+## Git Workflow
+
+Rias uses version-based branching: `main → vX.Y.Z → feature/*`
+
+- **main:** Stable, tagged releases only. Never push directly.
+- **vX.Y.Z:** Version branches created from main. All development happens here.
+- **feature/\*, bugfix/\*, etc.:** Work branches created from vX.Y.Z, squash merged back.
+- **hotfix/vX.Y.Z-\*:** Emergency fixes from main at a tag.
+
+Merge strategies:
+- Work branches → vX.Y.Z: **squash merge**
+- vX.Y.Z → main: **merge commit** (`--no-ff`) + tag
+
+See `/git-management` skill for full details.
 
 ## Conventions
 
-- Follows root `D:\REPOS\.claude\rules\` (git-workflow, code-style, tdd)
+- Follows root `D:\REPOS\.claude\rules\` (git-workflow, code-style)
+- Overrides root TDD rules with Node.js-specific `.claude/rules/tdd.md`
 - Code and commits in English
 - User-facing docs in Slovak
 - OpenClaw skills follow `SKILL.md` format (see `.claude/rules/openclaw-skills.md`)
