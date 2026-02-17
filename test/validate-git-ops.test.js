@@ -2,14 +2,16 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runBashHook } from './helpers.js';
+import { runBashHook, HOOK_SUBPROCESS_AVAILABLE } from './helpers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOOK = resolve(__dirname, '..', '.claude', 'hooks', 'validate-git-ops.sh');
 
 const run = (cmd) => runBashHook(HOOK, { tool_input: { command: cmd } });
 
-describe('validate-git-ops.sh', () => {
+const describeHook = HOOK_SUBPROCESS_AVAILABLE ? describe : describe.skip;
+
+describeHook('validate-git-ops.sh', () => {
 
   describe('force push blocking', () => {
     it('should block git push --force', () => {

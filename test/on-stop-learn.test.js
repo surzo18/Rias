@@ -4,17 +4,19 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdtempSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { runBashHook } from './helpers.js';
+import { runBashHook, HOOK_SUBPROCESS_AVAILABLE } from './helpers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOOK = resolve(__dirname, '..', '.claude', 'hooks', 'on-stop-learn.sh');
 
-describe('on-stop-learn.sh', () => {
+const describeHook = HOOK_SUBPROCESS_AVAILABLE ? describe : describe.skip;
+
+describeHook('on-stop-learn.sh', () => {
   let tempDir, learningsDir, transcriptPath;
 
   beforeEach(() => {
     tempDir = mkdtempSync(resolve(tmpdir(), 'rias-test-'));
-    learningsDir = resolve(tempDir, '.claude', 'learnings');
+    learningsDir = resolve(tempDir, '.claude', 'local', 'learnings');
     mkdirSync(learningsDir, { recursive: true });
     writeFileSync(resolve(learningsDir, 'patterns.md'), '# Patterns\n');
     writeFileSync(resolve(learningsDir, 'decisions.md'), '# Decisions\n');
@@ -147,3 +149,4 @@ describe('on-stop-learn.sh', () => {
     assert.match(content, /User correction detected/);
   });
 });
+

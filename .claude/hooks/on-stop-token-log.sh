@@ -17,11 +17,10 @@ if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
   exit 0
 fi
 
-# Parse JSONL: sum tokens from assistant messages, format output in one Node.js call
 RESULT=$(node -e "
   const fs = require('fs');
   const path = process.argv[1];
-  const lines = fs.readFileSync(path,'utf8').trim().split('\n');
+  const lines = fs.readFileSync(path,'utf8').trim().split('\\n');
   let inputTokens = 0, outputTokens = 0, turns = 0;
   for (const line of lines) {
     try {
@@ -34,37 +33,36 @@ RESULT=$(node -e "
     } catch {}
   }
   const total = inputTokens + outputTokens;
-  if (total === 0) { process.exit(1); }
+  if (total === 0) process.exit(1);
   const fmt = n => n.toLocaleString();
   console.log([fmt(inputTokens), fmt(outputTokens), fmt(total), turns, total].join('|'));
 " "$TRANSCRIPT" 2>/dev/null) || exit 0
 
 IFS='|' read -r INPUT_FMT OUTPUT_FMT TOTAL_FMT TURNS TOTAL_RAW <<< "$RESULT"
 
-# Threshold alert
 THRESHOLD=100000
 if [ "$TOTAL_RAW" -gt "$THRESHOLD" ] 2>/dev/null; then
-  echo "TOKEN_WARNING: Session used $TOTAL_FMT tokens (threshold: $(node -e "console.log(($THRESHOLD).toLocaleString())")). Consider if this was efficient." >&2
+  echo "TOKEN_WARNING: Session used $TOTAL_FMT tokens (threshold: $(node -e "console.log(($THRESHOLD).toLocaleString())"))." >&2
 fi
 
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "$0")/../.." && pwd)}"
-LOG_FILE="$PROJECT_DIR/.claude/learnings/token-usage.md"
+LEARNINGS_DIR="$PROJECT_DIR/.claude/local/learnings"
+LOG_FILE="$LEARNINGS_DIR/token-usage.md"
+HOOK_LOG="$LEARNINGS_DIR/hook-log.md"
 
-# Create file with header if it doesn't exist
+mkdir -p "$LEARNINGS_DIR"
+
 if [ ! -f "$LOG_FILE" ]; then
-  mkdir -p "$(dirname "$LOG_FILE")"
   echo "# Token Usage Log" > "$LOG_FILE"
   echo "" >> "$LOG_FILE"
 fi
 
-# Log hook execution
-HOOK_LOG="$PROJECT_DIR/.claude/learnings/hook-log.md"
-if [ -f "$HOOK_LOG" ]; then
-  printf '| %s | stop-token-log | ok | %s tokens, %s turns |\n' "$TIMESTAMP" "$TOTAL_FMT" "$TURNS" >> "$HOOK_LOG"
+if [ ! -f "$HOOK_LOG" ]; then
+  printf '# Hook Execution Log\n\n| Date | Hook | Status | Details |\n|------|------|--------|---------|\n' > "$HOOK_LOG"
 fi
+printf '| %s | stop-token-log | ok | %s tokens, %s turns |\n' "$TIMESTAMP" "$TOTAL_FMT" "$TURNS" >> "$HOOK_LOG"
 
-# Append entry
 cat >> "$LOG_FILE" << EOF
 
 ### $TIMESTAMP

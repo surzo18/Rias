@@ -4,17 +4,19 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdtempSync, readFileSync, rmSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { runBashHook } from './helpers.js';
+import { runBashHook, HOOK_SUBPROCESS_AVAILABLE } from './helpers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOOK = resolve(__dirname, '..', '.claude', 'hooks', 'on-failure-learn.sh');
 
-describe('on-failure-learn.sh', () => {
+const describeHook = HOOK_SUBPROCESS_AVAILABLE ? describe : describe.skip;
+
+describeHook('on-failure-learn.sh', () => {
   let tempDir, learningsDir, mistakesFile;
 
   beforeEach(() => {
     tempDir = mkdtempSync(resolve(tmpdir(), 'rias-test-'));
-    learningsDir = resolve(tempDir, '.claude', 'learnings');
+    learningsDir = resolve(tempDir, '.claude', 'local', 'learnings');
     mistakesFile = resolve(learningsDir, 'mistakes.md');
   });
 
@@ -58,3 +60,4 @@ describe('on-failure-learn.sh', () => {
     assert.match(readFileSync(mistakesFile, 'utf8'), /unknown error/);
   });
 });
+

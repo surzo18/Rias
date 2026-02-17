@@ -1,155 +1,72 @@
 # Rias
 
-## Overview
+![Rias Gremory](https://static.wikia.nocookie.net/highschooldxd/images/0/0f/Rias_Gremory_Anime.png)
 
-OpenClaw integration project. Builds skills, tools, and integrations for the [OpenClaw](https://docs.openclaw.ai) self-hosted AI gateway platform. Rias provides Claude Code infrastructure (hooks, rules, skills), a self-improvement system, version-based git workflow, and automated documentation.
+Rias je open-source starter kit pre AI agent infra (Claude Code hooks, pravidla, audit workflow, dokumentacny workflow) s oddelenim na:
+
+- verzovany default stav projektu (v gite)
+- lokalny runtime stav (mimo gitu)
+
+## Preco nazov Rias
+
+Nazov je inspirovany postavou **Rias Gremory** z *High School DxD*.
+Myslienka projektu: mat silny, jasne riadeny "core" pre agentov, ktory vies skopirovat ako starting point do dalsich projektov.
+
+## Ciel projektu
+
+- Rias je **obal/infrastruktura** projektu, nie business logika.
+- OpenClaw skills a aplikacna logika patria do `src/`.
+- Runtime zapisy (logy, handovery, lokalna memoria) maju ostat lokalne.
 
 ## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Run tests
 npm test
-
-# Watch mode
-npm run test:watch
-
-# Generate changelog from git history
-npm run changelog:init
-
-# Regenerate changelog (appends new entries)
-npm run changelog
 ```
 
-## Project Structure
+## Struktura
 
-```
+```text
 tools/Rias/
-├── .claude/
-│   ├── settings.json        # Hooks, permissions (team-shared)
-│   ├── settings.local.json  # Personal overrides (gitignored)
-│   ├── hooks/               # Hook scripts
-│   │   ├── on-session-start.sh     # Session counter, audit trigger, handover
-│   │   ├── on-failure-learn.sh     # Record tool errors
-│   │   ├── on-compact-handover.sh  # Save session context (git state)
-│   │   ├── on-stop-learn.sh        # Persist learnings from transcript
-│   │   ├── on-stop-token-log.sh    # Log token consumption + threshold
-│   │   ├── validate-git-ops.sh     # Git validation + secret scanning
-│   │   └── post-edit-docs.sh       # Doc update reminders
-│   ├── rules/               # Auto-loaded project rules
-│   │   ├── openclaw-skills.md      # OpenClaw skill format rules
-│   │   ├── self-improvement.md     # Learning system rules
-│   │   ├── tdd.md                  # Node.js TDD rules
-│   │   └── documentation.md        # Doc format standards
-│   ├── skills/              # Claude Code skills
-│   │   ├── git-management/SKILL.md # Version-based workflow enforcement
-│   │   ├── reflect/SKILL.md        # Deep reflection trigger
-│   │   ├── update-docs/SKILL.md    # Doc regeneration/validation
-│   │   └── audit-infra/SKILL.md   # Periodic infrastructure audit
-│   ├── agents/              # Custom subagent definitions
-│   │   └── reflector.md            # Learnings analysis agent
-│   ├── learnings/           # Auto-populated by hooks
-│   │   ├── mistakes.md             # Tool errors
-│   │   ├── patterns.md             # Discovered patterns
-│   │   ├── decisions.md            # Architecture decisions
-│   │   ├── token-usage.md          # Session token consumption
-│   │   └── hook-log.md             # Hook execution log
-│   ├── handovers/           # Session context (auto-managed)
-│   └── agent-memory/        # Persistent subagent memory
-│       └── session-counter.json   # Session count + audit tracking
-├── test/                    # Hook tests (node:test runner)
-│   ├── helpers.js                  # Shared test helper (spawnSync)
-│   ├── setup.test.js               # Smoke test
-│   ├── validate-git-ops.test.js    # Git validation tests
-│   ├── on-failure-learn.test.js    # Failure learning tests
-│   ├── on-stop-token-log.test.js   # Token logging tests
-│   └── post-edit-docs.test.js      # Doc reminder tests
-├── docs/
-│   └── skills/
-│       └── index.md         # Skill inventory
-├── skills/                  # OpenClaw skills (TBD)
-├── package.json
-├── CHANGELOG.md
-├── CLAUDE.md
-├── README.md
-└── .gitignore
+|- .claude/
+|  |- hooks/              # infrastruktura hookov
+|  |- rules/              # projektove pravidla
+|  |- skills/             # Claude Code workflow skills
+|  |- audits/             # verzovany audit baseline
+|  |- learnings/          # verzovane default sablony
+|  `- local/              # lokalny runtime stav (gitignored)
+|- src/
+|  `- skills/             # OpenClaw skills pre konkretny projekt
+|- docs/skills/index.md
+|- test/
+|- README.md
+|- CLAUDE.md
+`- .gitignore
 ```
 
-## Skills
+## Lokalny vs verzovany stav
 
-### Claude Code Skills
+Lokalne (necommitovat):
+- `.claude/local/**` (hook log, token usage, handovers, runtime learnings, lokalny session counter, lokalne audity)
 
-Skills that enhance the Claude Code development workflow:
+Verzovane (commitovat):
+- `.claude/hooks/**`, `.claude/rules/**`, `.claude/skills/**`
+- `.claude/audits/latest.json` (baseline)
+- `.claude/learnings/*.md` (default sablony)
+- `src/skills/**` (projektove skills)
 
-| Skill | Command | Purpose |
-|-------|---------|---------|
-| [git-management](docs/skills/index.md#git-management) | `/git-management` | Version-based git workflow enforcement |
-| [reflect](docs/skills/index.md#reflect) | `/reflect` | Deep reflection on learnings |
-| [update-docs](docs/skills/index.md#update-docs) | `/update-docs` | Regenerate and validate docs |
-| [audit-infra](docs/skills/index.md#audit-infra) | `/audit-infra` | Periodic infrastructure audit (8 areas) |
+## Audit workflow
 
-### OpenClaw Skills
+- Audit sa spusta cez `/audit-infra`.
+- Audit vytvara plan akcii, ulozi ho a pri dalsom behu kontroluje ci bol implementovany.
+- Implementacia audit planu ide az po potvrdeni usera.
 
-OpenClaw gateway skills are under development in the `skills/` directory.
+## Licencia
 
-## Documentation System
+MIT (rovnaky open-source model ako Clawd Bot).
+Pozri `LICENSE`.
 
-Rias uses an automated documentation system:
+## Poznamka k obrazku
 
-- **README.md** - Project overview (this file)
-- **CHANGELOG.md** - Auto-generated from conventional commits via `npm run changelog`
-- **docs/skills/index.md** - Inventory of all skills with descriptions
-- **CLAUDE.md** - Claude Code integration context (not user docs)
-
-### Keeping Docs Updated
-
-Run `/update-docs` in Claude Code to regenerate and validate all documentation, or use:
-
-```bash
-npm run changelog    # Regenerate CHANGELOG.md
-```
-
-The `post-edit-docs.sh` hook automatically reminds you to update docs when relevant files change.
-
-## Architecture Pillars
-
-Rias is built on six pillars:
-
-1. **Claude Integration** - `.claude/` infrastructure (hooks, rules, skills, agents)
-2. **Reflection** - Self-improvement system (learnings, handovers, token tracking, `/reflect`)
-3. **Versioning** - Version-based git workflow (`main → vX.Y.Z → feature/*`, `/git-management`)
-4. **Documentation** - Auto-updating docs (CHANGELOG, README, skill inventory)
-5. **Testing** - TDD with `node:test` built-in runner, mandatory RED-GREEN-REFACTOR cycle
-6. **Audit** - Periodic infrastructure audit every 100 sessions (`/audit-infra`), hook execution logging
-
-## Git Workflow
-
-Rias uses version-based branching:
-
-```
-main (stable, tagged releases only)
-  └── vX.Y.Z (version branch, all development here)
-        ├── feature/*   (squash merge → vX.Y.Z)
-        ├── bugfix/*    (squash merge → vX.Y.Z)
-        └── merge --no-ff → main + tag vX.Y.Z
-```
-
-- Work branches are created from version branches, not main
-- Version branches are merged to main with `--no-ff` and tagged
-- Hotfixes branch from main at a tag: `hotfix/vX.Y.Z-description`
-
-## OpenClaw Reference
-
-| Topic | URL |
-|-------|-----|
-| Skills system | https://docs.openclaw.ai/tools/skills |
-| Skills config | https://docs.openclaw.ai/tools/skills-config |
-| Gateway | https://docs.openclaw.ai/gateway |
-| Nodes | https://docs.openclaw.ai/nodes |
-| Full index | https://docs.openclaw.ai/llms.txt |
-
-## License
-
-TBD
+Obrazok je externy odkaz na postavu, prava patria povodnym autorom/drzitelom IP.

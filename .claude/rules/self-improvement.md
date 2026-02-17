@@ -1,58 +1,29 @@
 # Self-Improvement Rules
 
-## Automatic Learning
+## Runtime storage policy
 
-The hooks system captures learnings automatically:
+- Local runtime state must go to `.claude/local/**` (not for commit).
+- Versioned defaults/templates stay in `.claude/**` (excluding `.claude/local/**`).
 
-- **PostToolUseFailure** → records errors to `learnings/mistakes.md`
-- **Stop** → `on-stop-learn.sh` parses transcript for corrections/patterns/decisions
-- **Stop** → `on-stop-token-log.sh` logs token consumption (alerts if >100k)
-- **PreCompact** → saves session context to `handovers/`
-- **SessionStart** → loads latest handover + learnings summary
+## Automatic learning hooks
 
-## What Gets Recorded
+- `PostToolUseFailure` -> `.claude/local/learnings/mistakes.md`
+- `Stop` (`on-stop-learn.sh`) -> `.claude/local/learnings/patterns.md`, `.claude/local/learnings/decisions.md`
+- `Stop` (`on-stop-token-log.sh`) -> `.claude/local/learnings/token-usage.md`
+- `PreCompact` -> `.claude/local/handovers/*.md`
+- `SessionStart` -> local context summary + audit follow-up check
 
-| Category | File | When |
-|----------|------|------|
-| Mistakes | `learnings/mistakes.md` | Tool failure (automatic) |
-| Patterns | `learnings/patterns.md` | Stop hook detects pattern (automatic) |
-| Decisions | `learnings/decisions.md` | Stop hook detects decision (automatic) |
-| Token usage | `learnings/token-usage.md` | Stop hook logs per-session totals (automatic) |
+## Audit model
 
-## Token Tracking
+- Latest local audit: `.claude/local/audits/latest.json`
+- Local reports: `.claude/local/audits/audit-*.md`
+- Versioned baseline audit config may stay in `.claude/audits/`
 
-The Stop hook logs token consumption from each session:
+Follow-up rule:
+- If unresolved audit actions exist, require explicit user confirmation before implementation.
 
-- **Hook:** `on-stop-token-log.sh` (command type, runs alongside learnings hook)
-- **Threshold:** Sessions exceeding 100k tokens trigger a warning
-- **Log file:** `learnings/token-usage.md`
-- **Data:** input tokens, output tokens, total, turn count per session
-- **Source:** Parsed from transcript JSONL (`usage` objects in assistant messages)
+## Bloat protection
 
-The `/reflect` command analyzes token usage for patterns:
-- High-usage sessions (>100k tokens) flagged for review
-- Trends over time (increasing/decreasing per-session usage)
-- Correlation between turn count and token consumption
-
-## Manual Reflection
-
-Use `/reflect` to trigger deep analysis:
-- Identifies repeated patterns (3+ → propose new rule)
-- Promotes key insights to CLAUDE.md
-- Analyzes token usage trends
-- Cleans up stale/duplicate entries
-
-## Session Tracking & Periodic Audit
-
-- **Counter:** `.claude/agent-memory/session-counter.json` tracks session count
-- **Hook log:** `.claude/learnings/hook-log.md` records every hook execution
-- **Audit trigger:** Every 100 sessions, SessionStart outputs audit reminder
-- **Audit skill:** `/audit-infra` runs 8-section comprehensive audit
-- **After audit:** Update `lastAuditAt` and `lastAuditDate` in counter file
-
-## Bloat Protection
-
-- Learnings files: soft 100-line limit per file (enforced by hooks with warnings)
-- Hook log: truncate at 500 lines (keep last 200) during audit
-- Handovers: auto-deleted after 7 days
-- Only record genuinely notable learnings, not trivial observations
+- Learnings files: soft limit 100 lines per file
+- Hook log: trim during audits if needed
+- Old handovers: auto-cleaned after retention period

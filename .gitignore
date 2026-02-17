@@ -40,5 +40,5 @@ coverage/
 
 # Claude Code (local/ephemeral)
 .claude/settings.local.json
-.claude/handovers/*.md
+.claude/local/
 .claude/agent-memory-local/

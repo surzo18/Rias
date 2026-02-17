@@ -4,17 +4,19 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { runBashHook } from './helpers.js';
+import { runBashHook, HOOK_SUBPROCESS_AVAILABLE } from './helpers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOOK = resolve(__dirname, '..', '.claude', 'hooks', 'on-stop-token-log.sh');
 
-describe('on-stop-token-log.sh', () => {
+const describeHook = HOOK_SUBPROCESS_AVAILABLE ? describe : describe.skip;
+
+describeHook('on-stop-token-log.sh', () => {
   let tempDir, transcriptPath, learningsDir;
 
   beforeEach(() => {
     tempDir = mkdtempSync(resolve(tmpdir(), 'rias-test-'));
-    learningsDir = resolve(tempDir, '.claude', 'learnings');
+    learningsDir = resolve(tempDir, '.claude', 'local', 'learnings');
     mkdirSync(learningsDir, { recursive: true });
     transcriptPath = resolve(tempDir, 'transcript.jsonl');
   });
@@ -87,3 +89,4 @@ describe('on-stop-token-log.sh', () => {
     assert.match(content, /^# Token Usage Log/);
   });
 });
+

@@ -4,12 +4,14 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { runBashHook } from './helpers.js';
+import { runBashHook, HOOK_SUBPROCESS_AVAILABLE } from './helpers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOOK = resolve(__dirname, '..', '.claude', 'hooks', 'on-compact-handover.sh');
 
-describe('on-compact-handover.sh', () => {
+const describeHook = HOOK_SUBPROCESS_AVAILABLE ? describe : describe.skip;
+
+describeHook('on-compact-handover.sh', () => {
   let tempDir;
 
   beforeEach(() => {
@@ -25,7 +27,7 @@ describe('on-compact-handover.sh', () => {
   it('should create handover file in handovers directory', () => {
     run({ session_id: 'test-123', trigger: 'context_limit' });
 
-    const handoversDir = resolve(tempDir, '.claude', 'handovers');
+    const handoversDir = resolve(tempDir, '.claude', 'local', 'handovers');
     const files = readdirSync(handoversDir).filter(f => f.startsWith('handover-'));
     assert.equal(files.length, 1);
   });
@@ -33,7 +35,7 @@ describe('on-compact-handover.sh', () => {
   it('should include session ID and trigger', () => {
     run({ session_id: 'sess-abc', trigger: 'manual' });
 
-    const handoversDir = resolve(tempDir, '.claude', 'handovers');
+    const handoversDir = resolve(tempDir, '.claude', 'local', 'handovers');
     const files = readdirSync(handoversDir);
     const content = readFileSync(resolve(handoversDir, files[0]), 'utf8');
     assert.match(content, /sess-abc/);
@@ -43,7 +45,7 @@ describe('on-compact-handover.sh', () => {
   it('should include git branch info', () => {
     run({ session_id: 'test', trigger: 'test' });
 
-    const handoversDir = resolve(tempDir, '.claude', 'handovers');
+    const handoversDir = resolve(tempDir, '.claude', 'local', 'handovers');
     const files = readdirSync(handoversDir);
     const content = readFileSync(resolve(handoversDir, files[0]), 'utf8');
     assert.match(content, /\*\*Branch:\*\*/);
@@ -52,7 +54,7 @@ describe('on-compact-handover.sh', () => {
   it('should include recent commits section', () => {
     run({ session_id: 'test', trigger: 'test' });
 
-    const handoversDir = resolve(tempDir, '.claude', 'handovers');
+    const handoversDir = resolve(tempDir, '.claude', 'local', 'handovers');
     const files = readdirSync(handoversDir);
     const content = readFileSync(resolve(handoversDir, files[0]), 'utf8');
     assert.match(content, /Recent commits/);
@@ -68,3 +70,4 @@ describe('on-compact-handover.sh', () => {
     assert.match(r.stderr, /Handover saved/);
   });
 });
+

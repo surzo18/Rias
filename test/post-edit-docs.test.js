@@ -2,14 +2,16 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runBashHook } from './helpers.js';
+import { runBashHook, HOOK_SUBPROCESS_AVAILABLE } from './helpers.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const HOOK = resolve(__dirname, '..', '.claude', 'hooks', 'post-edit-docs.sh');
 
 const run = (filePath) => runBashHook(HOOK, { tool_input: { file_path: filePath } });
 
-describe('post-edit-docs.sh', () => {
+const describeHook = HOOK_SUBPROCESS_AVAILABLE ? describe : describe.skip;
+
+describeHook('post-edit-docs.sh', () => {
 
   it('should remind about docs when package.json changes', () => {
     assert.match(run('/d/REPOS/tools/Rias/package.json').stdout, /DOC_REMINDER.*package\.json/);
