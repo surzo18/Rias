@@ -1,9 +1,20 @@
-# CLAUDE.md - Rias
+# CLAUDE.md
 
 ## Overview
 
-Rias je infrastruktura/starter pre agent workflows.
+Rias je starter template pre Claude Code infrastrukturu.
+Hooks, rules, skills a audit workflow — vsetko pripravene na pouzitie.
 Business logika a projektove skills patria do `src/`.
+
+## Features
+
+- **Self-improvement** — automaticke ucenie z chyb, extrakcia patterns, token tracking
+- **Git safety** — blokacia force push, secret scanning, conventional commits
+- **Audit workflow** — 8-oblastny audit s follow-up tracking
+- **Documentation workflow** — automaticke doc reminders, changelog generovanie
+- **Session management** — handover snapshots, session counter, learnings restore
+- **Project skills framework** — YAML frontmatter format, skill inventory
+- **Zero dependencies** — node:test, bash hooks, 36+ testov
 
 ## Runtime model
 
@@ -18,52 +29,54 @@ Local runtime obsahuje:
 - local session counter
 - local audit outputs
 
-## Scope
-
-Rias je vendor-agnosticka infra vrstva pre AI projekt workflow.
-
 ## Build and test
 
 ```bash
 npm install
 npm test
 npm run test:watch
-npm run changelog
-npm run changelog:init
+npm run setup          # First-time project setup
+npm run changelog      # Regenerate CHANGELOG.md
+npm run changelog:init # Full CHANGELOG.md rebuild
 ```
 
 ## Structure
 
 ```text
-tools/Rias/
-|- .claude/
-|  |- hooks/
-|  |- rules/
-|  |- skills/
-|  |- audits/
-|  |- learnings/
-|  `- local/ (gitignored runtime)
-|- src/skills/
-|- docs/skills/index.md
-|- test/
-|- README.md
-|- CLAUDE.md
-`- package.json
+.claude/
+|- hooks/              # 7 production-ready hookov
+|- rules/              # 4 project rules
+|- skills/             # 4 workflow skills
+|- agents/             # agent configs
+|- audits/             # verzovany audit baseline
+|- learnings/          # verzovane default sablony
+`- local/              # lokalny runtime stav (gitignored)
+src/skills/            # projektove skills
+scripts/setup.js       # interactive setup
+test/                  # hook testy (36+)
+docs/skills/index.md   # skill inventory
 ```
 
 ## Hooks
 
-- `on-session-start.sh` -> runtime session summary, audit follow-up check
-- `validate-git-ops.sh` -> git safety + secret checks
-- `on-failure-learn.sh` -> runtime mistakes log
-- `on-stop-learn.sh` -> runtime patterns/decisions extraction
-- `on-stop-token-log.sh` -> runtime token logging
-- `on-compact-handover.sh` -> runtime handover snapshot
-- `post-edit-docs.sh` -> docs reminder
+- `on-session-start.sh` → runtime session summary, audit follow-up check
+- `validate-git-ops.sh` → git safety + secret checks
+- `on-failure-learn.sh` → runtime mistakes log
+- `on-stop-learn.sh` → runtime patterns/decisions extraction
+- `on-stop-token-log.sh` → runtime token logging
+- `on-compact-handover.sh` → runtime handover snapshot
+- `post-edit-docs.sh` → docs reminder
+
+## Skills
+
+- `/audit-infra` — infrastructure audit s action tracking
+- `/git-management` — version-based git workflow enforcement
+- `/reflect` — deep analysis nauceneho, pattern → rule promotion
+- `/update-docs` — dokumentacia regeneracia a validacia
 
 ## Git workflow
 
-`main -> vX.Y.Z -> feature/*`
+`main → vX.Y.Z → feature/*`
 
 - work branches from `vX.Y.Z`
 - squash merge back to version branch

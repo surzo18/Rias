@@ -6,6 +6,7 @@
   "scripts": {
     "test": "node --test --test-isolation=none",
     "test:watch": "node --test --test-isolation=none --watch",
+    "setup": "node scripts/setup.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog:init": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },

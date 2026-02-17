@@ -24,8 +24,7 @@ build/
 .DS_Store
 Thumbs.db
 
-# OpenClaw runtime state
-.openclaw/
+# Runtime state
 sessions/
 transcripts/
 

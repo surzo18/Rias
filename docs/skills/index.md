@@ -2,27 +2,27 @@
 
 All Claude Code skills available in the Rias project.
 
+## audit-infra
+
+- **Command:** `/audit-infra`
+- **File:** `.claude/skills/audit-infra/SKILL.md`
+- **Description:** 8-area infrastructure audit with follow-up action tracking.
+- **Key behaviors:**
+  - Persists latest state in `.claude/local/audits/latest.json`
+  - Checks unresolved actions before new implementation
+  - Requires explicit user confirmation before applying audit plan
+
 ## git-management
 
 - **Command:** `/git-management`
 - **File:** `.claude/skills/git-management/SKILL.md`
-- **Description:** Enforces version-based git workflow for the Rias project. Implements `main -> vX.Y.Z -> feature/*` branching model.
+- **Description:** Enforces version-based git workflow. Implements `main -> vX.Y.Z -> feature/*` branching model.
 
 ## reflect
 
 - **Command:** `/reflect`
 - **File:** `.claude/skills/reflect/SKILL.md`
-- **Description:** Deep reflection over accumulated learnings and token usage.
-
-## audit-infra
-
-- **Command:** `/audit-infra`
-- **File:** `.claude/skills/audit-infra/SKILL.md`
-- **Description:** Infrastructure audit with follow-up action tracking.
-- **Key behaviors:**
-  - persists latest state in `.claude/local/audits/latest.json`
-  - checks unresolved actions before new implementation
-  - requires explicit user confirmation before applying audit plan
+- **Description:** Deep analysis of accumulated learnings, pattern → rule promotion.
 
 ## update-docs
 
