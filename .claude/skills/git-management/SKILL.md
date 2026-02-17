@@ -20,7 +20,7 @@ main (stable, tagged releases only)
   │     └── merge --no-ff → main + tag v0.1.0
   │
   └── v0.2.0 (next version, created from main after v0.1.0 release)
-        ├── feature/gateway-integ    (squash merge → v0.2.0)
+        ├── feature/project-integ    (squash merge → v0.2.0)
         └── ...
 ```
 
@@ -173,7 +173,7 @@ For urgent fixes to a released version:
 
 | Trigger | Update |
 |---------|--------|
-| New OpenClaw skill added | `CLAUDE.md` (project structure) |
+| New project skill added | `CLAUDE.md` (project structure) |
 | Stack decision made | `CLAUDE.md` (stack, build commands) |
 | New dependency added | `CLAUDE.md` (stack section) |
 | Architecture change | `CLAUDE.md` (project structure, conventions) |
@@ -259,7 +259,7 @@ git add path/to/file1 path/to/file2
 
 # Commit with conventional message
 git commit -m "$(cat <<'EOF'
-feat(skills): add gateway health check skill
+feat(skills): add project health check skill
 
 Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
 EOF
@@ -268,3 +268,4 @@ EOF
 # Push with upstream tracking
 git push -u origin v0.2.0
 ```
+

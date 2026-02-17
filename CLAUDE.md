@@ -3,7 +3,7 @@
 ## Overview
 
 Rias je infrastruktura/starter pre agent workflows.
-Business logika a OpenClaw skills patria do `src/`.
+Business logika a projektove skills patria do `src/`.
 
 ## Runtime model
 
@@ -18,9 +18,9 @@ Local runtime obsahuje:
 - local session counter
 - local audit outputs
 
-## OpenClaw docs source of truth
+## Scope
 
-https://docs.openclaw.ai
+Rias je vendor-agnosticka infra vrstva pre AI projekt workflow.
 
 ## Build and test
 

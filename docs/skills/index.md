@@ -20,7 +20,7 @@ All Claude Code skills available in the Rias project.
 - **File:** `.claude/skills/audit-infra/SKILL.md`
 - **Description:** Infrastructure audit with follow-up action tracking.
 - **Key behaviors:**
-  - persists latest state in `.claude/audits/latest.json`
+  - persists latest state in `.claude/local/audits/latest.json`
   - checks unresolved actions before new implementation
   - requires explicit user confirmation before applying audit plan
 
@@ -30,6 +30,6 @@ All Claude Code skills available in the Rias project.
 - **File:** `.claude/skills/update-docs/SKILL.md`
 - **Description:** Regenerates and validates documentation consistency.
 
-## OpenClaw project skills
+## Project skills
 
-OpenClaw project skills belong in `src/skills/`.
+Project-specific skills belong in `src/skills/`.

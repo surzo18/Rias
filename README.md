@@ -15,7 +15,7 @@ Myslienka projektu: mat silny, jasne riadeny "core" pre agentov, ktory vies skop
 ## Ciel projektu
 
 - Rias je **obal/infrastruktura** projektu, nie business logika.
-- OpenClaw skills a aplikacna logika patria do `src/`.
+- projektove skills a aplikacna logika patria do `src/`.
 - Runtime zapisy (logy, handovery, lokalna memoria) maju ostat lokalne.
 
 ## Quick Start
@@ -37,7 +37,7 @@ tools/Rias/
 |  |- learnings/          # verzovane default sablony
 |  `- local/              # lokalny runtime stav (gitignored)
 |- src/
-|  `- skills/             # OpenClaw skills pre konkretny projekt
+|  `- skills/             # projektove skills pre konkretny projekt
 |- docs/skills/index.md
 |- test/
 |- README.md

@@ -26,7 +26,7 @@ cat > "$HANDOVER_FILE" << EOF
 
 **Session:** $SESSION_ID
 **Trigger:** $TRIGGER
-**Project:** Rias (OpenClaw integration)
+**Project:** Rias (generic infra layer)
 
 ## Current State
 
@@ -55,3 +55,4 @@ printf '| %s | compact-handover | ok | saved to %s |\n' "$(date +'%Y-%m-%d %H:%M
 
 echo "Handover saved to $HANDOVER_FILE" >&2
 exit 0
+

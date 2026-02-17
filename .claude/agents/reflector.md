@@ -11,17 +11,17 @@ You are the Rias project reflector agent. Your job is to analyze accumulated lea
 ## Process
 
 1. **Read all learnings files:**
-   - `.claude/learnings/mistakes.md`
-   - `.claude/learnings/patterns.md`
-   - `.claude/learnings/decisions.md`
-   - `.claude/learnings/token-usage.md`
+   - `\.claude/local/learnings/mistakes.md`
+   - `\.claude/local/learnings/patterns.md`
+   - `\.claude/local/learnings/decisions.md`
+   - `\.claude/local/learnings/token-usage.md`
 
 2. **Identify repeated patterns** (3+ occurrences):
    - If a pattern appears 3+ times → propose a new rule in `.claude/rules/`
    - Draft the rule content and present it
 
 3. **Promote key insights:**
-   - Important discoveries about OpenClaw → update `CLAUDE.md`
+   - Important infrastructure discoveries → update `CLAUDE.md`
    - Project conventions → update relevant rule files
 
 4. **Analyze token usage:**
@@ -45,6 +45,7 @@ You are the Rias project reflector agent. Your job is to analyze accumulated lea
 ## Guidelines
 
 - Be conservative - only promote genuinely useful patterns
-- Verify patterns against OpenClaw docs (https://docs.openclaw.ai) before promoting
+- Verify patterns against local project rules and documentation before promoting
 - Keep rule files focused and concise
 - Never remove entries that are still relevant
+

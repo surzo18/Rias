@@ -4,7 +4,7 @@
 
 - Keep under 500 lines
 - Update on new features, breaking changes, or structural changes
-- Sections: Overview, Quick Start, Project Structure, Skills, Documentation System, OpenClaw Reference, License
+- Sections: Overview, Quick Start, Project Structure, Skills, Runtime Model, License
 - Do NOT duplicate CLAUDE.md content - README is for users, CLAUDE.md is for Claude
 
 ## CHANGELOG.md

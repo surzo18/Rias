@@ -32,6 +32,7 @@ Run `npm test` before every commit.
 ## What to Test
 
 - Hook scripts: verify output format, edge cases (empty input, malformed JSON)
-- OpenClaw skills: validate YAML frontmatter, required fields
+- Project skills: validate YAML frontmatter, required fields
 - Utility functions: pure logic, transformations, parsers
 - Integration: script exit codes, file I/O behavior
+
