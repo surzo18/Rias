@@ -14,7 +14,7 @@ Business logika a projektove skills patria do `src/`.
 - **Documentation workflow** — automaticke doc reminders, changelog generovanie
 - **Session management** — handover snapshots, session counter, learnings restore
 - **Project skills framework** — YAML frontmatter format, skill inventory
-- **Zero dependencies** — node:test, bash hooks, 36+ testov
+- **Zero dependencies** — node:test, bash hooks, 80+ testov
 
 ## Runtime model
 
@@ -53,7 +53,7 @@ npm run changelog:init # Full CHANGELOG.md rebuild
 `- local/              # lokalny runtime stav (gitignored)
 src/skills/            # projektove skills
 scripts/setup.js       # interactive setup
-test/                  # hook testy (36+)
+test/                  # hook testy (80+)
 docs/skills/index.md   # skill inventory
 ```
 

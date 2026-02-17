@@ -16,7 +16,7 @@ function createTempProject() {
     type: 'module',
     scripts: { test: 'node --test' }
   }, null, 2));
-  writeFileSync(join(dir, 'README.md'), '# Rias\n\nStarter template pre Claude Code infrastrukturu.\n');
+  writeFileSync(join(dir, 'README.md'), '# Rias\n\nStarter template for Claude Code infrastructure.\n');
   mkdirSync(join(dir, '.claude', 'learnings'), { recursive: true });
   mkdirSync(join(dir, '.claude', 'audits'), { recursive: true });
   mkdirSync(join(dir, '.claude', 'agent-memory'), { recursive: true });
@@ -55,10 +55,12 @@ describe('setup script', () => {
     assert.equal(pkg.name, 'my-awesome-project');
   });
 
-  it('should replace Rias in README title', () => {
+  it('should replace Rias in README title and subtitle', () => {
     const readme = readFileSync(join(tempDir, 'README.md'), 'utf8');
     assert.ok(readme.startsWith('# my-awesome-project'));
     assert.ok(!readme.includes('# Rias'));
+    assert.ok(readme.includes('my-awesome-project.'), 'subtitle should contain project name');
+    assert.ok(!readme.includes('Starter template for Claude Code infrastructure.'), 'original subtitle should be replaced');
   });
 
   it('should reset learnings templates', () => {

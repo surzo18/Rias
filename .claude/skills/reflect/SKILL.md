@@ -6,7 +6,7 @@ context: fork
 agent: reflector
 ---
 
-Analyze all accumulated learnings in `.claude/learnings/` for the Rias project.
+Analyze all accumulated learnings in `.claude/local/learnings/` for this project.
 
 Identify repeated patterns (3+ occurrences), propose new rules, promote key insights to CLAUDE.md, and clean up stale entries.
 

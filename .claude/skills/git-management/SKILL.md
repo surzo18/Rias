@@ -37,7 +37,7 @@ git checkout -b v0.2.0
 
 ```bash
 git checkout v0.1.0
-git checkout -b feature/add-gateway-skill
+git checkout -b feature/add-new-skill
 ```
 
 ### Hotfix branches (from main at a tag)

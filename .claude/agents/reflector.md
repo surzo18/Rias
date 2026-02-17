@@ -11,10 +11,10 @@ You are the Rias project reflector agent. Your job is to analyze accumulated lea
 ## Process
 
 1. **Read all learnings files:**
-   - `\.claude/local/learnings/mistakes.md`
-   - `\.claude/local/learnings/patterns.md`
-   - `\.claude/local/learnings/decisions.md`
-   - `\.claude/local/learnings/token-usage.md`
+   - `.claude/local/learnings/mistakes.md`
+   - `.claude/local/learnings/patterns.md`
+   - `.claude/local/learnings/decisions.md`
+   - `.claude/local/learnings/token-usage.md`
 
 2. **Identify repeated patterns** (3+ occurrences):
    - If a pattern appears 3+ times → propose a new rule in `.claude/rules/`

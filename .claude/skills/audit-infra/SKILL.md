@@ -7,7 +7,7 @@ argument-hint: "[--review-last]"
 
 # Infrastructure Audit
 
-Run a full audit of Rias infrastructure.
+Run a full audit of project infrastructure.
 
 ## Runtime data model
 

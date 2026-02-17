@@ -1,60 +1,7 @@
 {
-  "id": "audit-2026-02-16-session-0",
-  "date": "2026-02-16",
+  "id": "audit-baseline",
+  "date": "",
   "session": 0,
-  "summary": {
-    "pass": 6,
-    "warn": 2,
-    "fail": 0
-  },
-  "actions": [
-    {
-      "id": "A1",
-      "title": "Harden git command parsing and content-based secret scanning",
-      "severity": "high",
-      "status": "done",
-      "owner": "assistant",
-      "notes": "Improved git command extraction and added staged content secret scan."
-    },
-    {
-      "id": "A2",
-      "title": "Protect transcript-derived learnings from accidental commit",
-      "severity": "high",
-      "status": "done",
-      "owner": "assistant",
-      "notes": "Added commit guards for runtime learnings/handovers and ignored hook-log/token-usage."
-    },
-    {
-      "id": "A3",
-      "title": "Fix Windows test and hook execution portability",
-      "severity": "high",
-      "status": "done",
-      "owner": "assistant",
-      "notes": "Switched test runner isolation mode and added subprocess-availability skip guards."
-    },
-    {
-      "id": "A4",
-      "title": "Tighten settings allowlist to least privilege",
-      "severity": "medium",
-      "status": "done",
-      "owner": "assistant",
-      "notes": "Reduced broad wildcard allowlist in .claude/settings.json."
-    },
-    {
-      "id": "A5",
-      "title": "Enable reliable hook audit logging",
-      "severity": "medium",
-      "status": "done",
-      "owner": "assistant",
-      "notes": "All key hooks now ensure hook-log.md header exists before appending."
-    },
-    {
-      "id": "A6",
-      "title": "Normalize docs encoding and align tag/version strategy",
-      "severity": "low",
-      "status": "done",
-      "owner": "assistant",
-      "notes": "README/CLAUDE docs normalized to ASCII sections; added tag/version consistency warning in git validation."
-    }
-  ]
+  "summary": {},
+  "actions": []
 }

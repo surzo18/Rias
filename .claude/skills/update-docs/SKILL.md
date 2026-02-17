@@ -13,7 +13,7 @@ Regenerate and validate all Rias project documentation. Run this after significa
 ### 1. Regenerate CHANGELOG.md
 
 ```bash
-cd /d/REPOS/tools/Rias && npm run changelog
+npm run changelog
 ```
 
 If CHANGELOG.md doesn't exist yet, use `npm run changelog:init` instead.
@@ -33,7 +33,7 @@ If anything is outdated, update README.md.
 Read `docs/skills/index.md` and cross-reference with actual skills:
 
 ```bash
-find /d/REPOS/tools/Rias/.claude/skills -name "SKILL.md" -type f
+find .claude/skills -name "SKILL.md" -type f
 ```
 
 For each skill found:

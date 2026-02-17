@@ -25,20 +25,29 @@ async function main() {
     writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n');
     console.log(`Updated package.json name to "${projectName}"`);
 
-    // 2. Update README.md title
+    // 2. Update README.md
     const readmePath = join(PROJECT_DIR, 'README.md');
     if (existsSync(readmePath)) {
       let readme = readFileSync(readmePath, 'utf8');
       readme = readme.replace(/^# Rias\b/m, `# ${projectName}`);
       readme = readme.replace(
-        /Starter template pre Claude Code infrastrukturu\./,
-        `Claude Code infrastruktura pre ${projectName}.`
+        /Starter template for Claude Code infrastructure\./,
+        `Claude Code infrastructure for ${projectName}.`
       );
       writeFileSync(readmePath, readme);
       console.log('Updated README.md');
     }
 
-    // 3. Reset learnings templates
+    // 3. Update CLAUDE.md
+    const claudePath = join(PROJECT_DIR, 'CLAUDE.md');
+    if (existsSync(claudePath)) {
+      let claude = readFileSync(claudePath, 'utf8');
+      claude = claude.replace(/^Rias je starter template/m, `${projectName} je starter template`);
+      writeFileSync(claudePath, claude);
+      console.log('Updated CLAUDE.md');
+    }
+
+    // 4. Reset learnings templates
     const learningsDir = join(PROJECT_DIR, '.claude', 'learnings');
     const templates = ['mistakes.md', 'patterns.md', 'decisions.md', 'token-usage.md'];
     for (const file of templates) {
@@ -50,14 +59,14 @@ async function main() {
     }
     console.log('Reset learnings templates');
 
-    // 4. Reset session counter
+    // 5. Reset session counter
     const counterPath = join(PROJECT_DIR, '.claude', 'agent-memory', 'session-counter.json');
     if (existsSync(counterPath)) {
       writeFileSync(counterPath, JSON.stringify({ sessionCount: 0, lastAuditAt: 0, auditInterval: 100 }, null, 2) + '\n');
     }
     console.log('Reset session counter');
 
-    // 5. Reset audit state
+    // 6. Reset audit state
     const auditPath = join(PROJECT_DIR, '.claude', 'audits', 'latest.json');
     if (existsSync(auditPath)) {
       writeFileSync(auditPath, JSON.stringify({
@@ -68,7 +77,8 @@ async function main() {
     }
     console.log('Reset audit state');
 
-    // 6. Fresh git
+    // 7. Fresh git
+    console.log('Removing old .git directory...');
     const gitDir = join(PROJECT_DIR, '.git');
     if (existsSync(gitDir)) {
       rmSync(gitDir, { recursive: true, force: true });
