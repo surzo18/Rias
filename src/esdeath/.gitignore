@@ -1,0 +1,55 @@
+# Secrets — NEVER commit
+.env
+*.key
+*.pem
+*.p12
+
+# OpenClaw data — split ownership:
+#   Esdeath repo tracks: openclaw.json, cron/jobs.json, router/*
+#   OpenClaw runtime manages: workspace/ (has its own .git), agents, media, etc.
+.openclaw/
+openclaw-data/config/*.bak*
+openclaw-data/config/agents/
+openclaw-data/config/canvas/
+openclaw-data/config/completions/
+openclaw-data/config/credentials/
+openclaw-data/config/cron/*.bak*
+openclaw-data/config/devices/
+openclaw-data/config/identity/
+openclaw-data/config/media/
+openclaw-data/config/subagents/
+openclaw-data/config/telegram/
+openclaw-data/config/update-check.json
+openclaw-data/config/workspace/
+openclaw-data/router/nginx.conf
+
+# Docker
+docker-compose.extra.yml
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Claude Code
+.claude/settings.local.json
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Voice reference audio (large files, download separately)
+voices/*.wav
+voices/*.mp3
+voices/*.flac
+voices/*/
+!voices/.gitkeep
+
+# Node
+node_modules/
+package-lock.json
+dist/

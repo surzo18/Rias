@@ -47,7 +47,7 @@ Starter template for Claude Code infrastructure. Clone it, run setup, get a prod
 ### Zero dependencies
 - Node.js built-in test runner (`node:test`)
 - Bash hooks (cross-platform via Git Bash on Windows)
-- 80+ tests covering all hooks and setup
+- 100+ tests covering all hooks and setup
 
 ## Quick Start
 
@@ -72,14 +72,16 @@ npm run changelog     # Regenerate CHANGELOG.md
 
 ```text
 .claude/
-├── hooks/              # 7 production-ready hooks
+├── hooks/              # 9 production-ready hooks
 │   ├── on-session-start.sh
 │   ├── validate-git-ops.sh
 │   ├── on-failure-learn.sh
 │   ├── on-stop-learn.sh
 │   ├── on-stop-token-log.sh
 │   ├── on-compact-handover.sh
-│   └── post-edit-docs.sh
+│   ├── post-edit-docs.sh
+│   ├── enforce-tdd.sh
+│   └── telegram-hitl.sh
 ├── rules/              # 4 project rules
 │   ├── documentation.md
 │   ├── project-skills.md
@@ -95,7 +97,14 @@ npm run changelog     # Regenerate CHANGELOG.md
 ├── learnings/          # Versioned default templates
 ├── settings.json       # Hook config + permissions
 └── local/              # Local runtime state (gitignored)
-src/skills/             # Your project skills
+src/
+├── esdeath/            # Production app (OpenClaw personal assistant)
+│   ├── scripts/        # Docker build contexts (11 services)
+│   ├── skills/         # OpenClaw skills (11)
+│   ├── src/            # TypeScript service modules
+│   ├── docker-compose.yml
+│   └── CLAUDE.md       # esdeath-specific instructions
+└── skills/             # Your project skills
 scripts/setup.js        # Interactive setup
 test/                   # Hook tests
 docs/skills/index.md    # Skill inventory

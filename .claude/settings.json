@@ -11,7 +11,7 @@
       "Bash(npm run changelog:init)",
       "Bash(npm run changelog:init *)",
       "Bash(node --test*)",
-      "Bash(node -e *)",
+      "Bash(node *)",
       "Bash(git status*)",
       "Bash(git log*)",
       "Bash(git diff*)",
@@ -31,7 +31,25 @@
       "Bash(mkdir *)",
       "Bash(cat *)",
       "Bash(conventional-changelog *)",
-      "Bash(cd *)"
+      "Bash(cd *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(npm install)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(chmod *)",
+      "Bash(echo *)",
+      "Bash(pwd)",
+      "Bash(powershell *)",
+      "Bash(docker-compose *)",
+      "Bash(docker compose *)",
+      "Bash(docker compose ps*)",
+      "Bash(docker compose restart *)",
+      "Bash(docker compose stop *)",
+      "Bash(docker compose exec *)",
+      "Bash(docker build *)",
+      "Bash(docker logs *)",
+      "Bash(docker ps*)"
     ],
     "deny": [
       "Bash(git push --force *)",
@@ -46,7 +64,9 @@
       "Bash(git clean -f)",
       "Bash(rm -rf *)",
       "Bash(npm publish *)",
-      "Bash(npm publish)"
+      "Bash(npm publish)",
+      "Bash(docker compose down -v*)",
+      "Bash(docker-compose down -v*)"
     ]
   },
 
@@ -106,6 +126,23 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/validate-git-ops.sh\"",
             "timeout": 10,
             "statusMessage": "Validating git operation..."
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/telegram-hitl.sh\"",
+            "timeout": 130,
+            "statusMessage": "Awaiting HITL approval..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-tdd.sh\"",
+            "timeout": 5,
+            "statusMessage": "Checking TDD compliance..."
           }
         ]
       }

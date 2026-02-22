@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"D:/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/hooks/useSmartFilterSection.test.ts\":*)",
+      "Bash(npm test:*)",
+      "Bash(node -e \":*)",
+      "Bash(node -e:*)",
+      "Bash(D:/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/ContentRow/MovieCard.tsx:*)",
+      "Bash(D:/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/ContentRow/SeriesCard.tsx:*)",
+      "Bash(D:/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/ContentRow/cards.test.tsx:*)",
+      "Bash(D:/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/ContentRow/ContentRow.test.tsx:*)",
+      "Bash(D:/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/ContentRow/ContentRow.tsx:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(/d/REPOS/myprojects/jellyfin/web/src/apps/experimental/features/home/HeroBanner/HeroBanner.test.tsx:*)"
+    ]
+  }
+}
