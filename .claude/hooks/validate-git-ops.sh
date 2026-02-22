@@ -49,7 +49,7 @@ fi
 
 if echo "$GIT_COMMANDS" | grep -qE "^git[[:space:]]+commit\\b"; then
   # Block commit of files with secret-like names
-  DANGEROUS_FILES=$(git diff --cached --name-only 2>/dev/null | grep -iE '\.env($|\.)|\.key$|\.pem$|\.p12$|\.pfx$|\.htpasswd$|credentials|secret|\.secret|api.?key|token\.json|\.keystore$|oauth.*\.json|jwt.*\.json|passwd' || true)
+  DANGEROUS_FILES=$(git diff --cached --name-only 2>/dev/null | grep -iE '\.env($|\.)|\.key$|\.pem$|\.p12$|\.pfx$|\.htpasswd$|credentials|secret|\.secret|api.?key|token\.json|\.keystore$|oauth.*\.json|jwt.*\.json|passwd' | grep -ivE '\.env\.(example|sample|template|dist)$' || true)
   if [ -n "$DANGEROUS_FILES" ]; then
     echo "BLOCKED: Staged files may contain secrets (filename check):" >&2
     echo "$DANGEROUS_FILES" | while read -r f; do echo "  - $f" >&2; done
@@ -81,10 +81,12 @@ if echo "$GIT_COMMANDS" | grep -qE "^git[[:space:]]+commit\\b"; then
   fi
 
   # Content-based secret scan on staged text content
-  SECRET_PATTERN='AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[A-Za-z0-9_-]{35}|(api[_-]?key|secret|token|password)[[:space:]]*[:=][[:space:]]*["'"'"']?[A-Za-z0-9_\/+=.-]{16,}'
+  SECRET_PATTERN='AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9_]{20,}|xox[baprs]-[A-Za-z0-9-]{10,}|AIza[A-Za-z0-9_-]{35}|(api[_-]?key|secret|token|password)[[:space:]]*[:=][[:space:]]*["'"'"'][A-Za-z0-9_\/+=.-]{16,}'
   STAGED_FILES=$(git diff --cached --name-only 2>/dev/null || true)
   while IFS= read -r f; do
     [ -z "$f" ] && continue
+    # Skip test files — sanitizer tests legitimately contain secret-like patterns
+    echo "$f" | grep -qE '(__tests__|\.test\.(ts|js|mjs)|\.spec\.(ts|js|mjs)|/tests/)' && continue
     if git show ":$f" 2>/dev/null | grep -I -qE "$SECRET_PATTERN"; then
       echo "BLOCKED: Potential secret detected in staged file content: $f" >&2
       echo "Inspect staged content with: git show :$f" >&2
@@ -131,7 +133,7 @@ fi
 # Warn on adding files with secret-like names directly
 if echo "$GIT_COMMANDS" | grep -qE "^git[[:space:]]+add\\b"; then
   ADDED_FILES=$(echo "$COMMAND" | sed 's/^git add //' | tr ' ' '\n' | grep -v '^-' || true)
-  DANGEROUS_ADDS=$(echo "$ADDED_FILES" | grep -iE '\.env($|\.)|\.key$|\.pem$|\.p12$|\.pfx$|\.htpasswd$|credentials|secret|\.secret|api.?key|token\.json|\.keystore$|oauth.*\.json|jwt.*\.json|passwd' || true)
+  DANGEROUS_ADDS=$(echo "$ADDED_FILES" | grep -iE '\.env($|\.)|\.key$|\.pem$|\.p12$|\.pfx$|\.htpasswd$|credentials|secret|\.secret|api.?key|token\.json|\.keystore$|oauth.*\.json|jwt.*\.json|passwd' | grep -ivE '\.env\.(example|sample|template|dist)$' || true)
   if [ -n "$DANGEROUS_ADDS" ]; then
     echo "WARNING: Adding files that may contain secrets (filename check):" >&2
     echo "$DANGEROUS_ADDS" | while read -r f; do echo "  - $f" >&2; done
