@@ -27,6 +27,11 @@ if echo "$FILE_PATH" | grep -qE '^src/skills/'; then
   exit 0
 fi
 
+# Exempt src/esdeath/** — uses vitest, not node:test in test/
+if echo "$FILE_PATH" | grep -qE '^src/esdeath/'; then
+  exit 0
+fi
+
 # Derive expected test path: src/foo/bar.js -> test/foo/bar.test.js
 TEST_PATH=$(echo "$FILE_PATH" | sed 's|^src/|test/|' | sed 's|\.js$|.test.js|')
 

@@ -45,7 +45,7 @@ npm run changelog:init # Full CHANGELOG.md rebuild
 ```text
 .claude/
 |- hooks/              # 9 production-ready hookov (slúžia aj pre esdeath)
-|- rules/              # 4 project rules
+|- rules/              # 5 project rules
 |- skills/             # 4 workflow skills
 |- agents/             # agent configs
 |- audits/             # verzovany audit baseline

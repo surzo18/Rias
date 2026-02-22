@@ -41,6 +41,11 @@ describe('enforce-tdd.sh', () => {
     assert.equal(r.exitCode, 0);
   });
 
+  it('should exempt src/esdeath/** files', () => {
+    const r = runBashHook(HOOK, makeInput('src/esdeath/scripts/tts-adapter/server.js'));
+    assert.equal(r.exitCode, 0);
+  });
+
   it('should block src/*.js without a corresponding test file', () => {
     const r = runBashHook(HOOK, makeInput('src/telegram/bot.js'));
     assert.equal(r.exitCode, 1);
