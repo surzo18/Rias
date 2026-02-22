@@ -31,7 +31,11 @@
       "Bash(mkdir *)",
       "Bash(cat *)",
       "Bash(conventional-changelog *)",
-      "Bash(cd *)"
+      "Bash(cd *)",
+      "Bash(docker-compose *)",
+      "Bash(docker compose *)",
+      "Bash(docker build *)",
+      "Bash(docker logs *)"
     ],
     "deny": [
       "Bash(git push --force *)",
@@ -46,7 +50,9 @@
       "Bash(git clean -f)",
       "Bash(rm -rf *)",
       "Bash(npm publish *)",
-      "Bash(npm publish)"
+      "Bash(npm publish)",
+      "Bash(docker compose down -v*)",
+      "Bash(docker-compose down -v*)"
     ]
   },
 
@@ -106,6 +112,23 @@
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/validate-git-ops.sh\"",
             "timeout": 10,
             "statusMessage": "Validating git operation..."
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/telegram-hitl.sh\"",
+            "timeout": 130,
+            "statusMessage": "Awaiting HITL approval..."
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-tdd.sh\"",
+            "timeout": 5,
+            "statusMessage": "Checking TDD compliance..."
           }
         ]
       }

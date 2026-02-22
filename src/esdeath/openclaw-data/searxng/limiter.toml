@@ -1,0 +1,7 @@
+# Rate limiting disabled for internal use (server.limiter: false in settings.yml)
+# This file exists as a placeholder in case limiter is re-enabled later.
+
+[botdetection.ip_lists]
+pass_ip = [
+  '0.0.0.0/0',
+]

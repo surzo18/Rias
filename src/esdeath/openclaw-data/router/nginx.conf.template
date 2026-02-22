@@ -1,0 +1,36 @@
+server {
+  listen 8080;
+
+  location = /health {
+    return 200 "ok\n";
+    add_header Content-Type text/plain;
+  }
+
+  # Detailed health: proxies to TTS backend to verify it's alive.
+  location = /health/detailed {
+    proxy_pass http://${TTS_UPSTREAM}/docs;
+    proxy_connect_timeout 5s;
+    proxy_read_timeout 5s;
+  }
+
+  # Route TTS to configurable backend.
+  # Fish Speech (via tts-adapter): TTS_UPSTREAM=tts-adapter:3100
+  # Kokoro (direct):               TTS_UPSTREAM=kokoro-tts:8880
+  location = /v1/audio/speech {
+    proxy_pass http://${TTS_UPSTREAM}/v1/audio/speech;
+    proxy_set_header Authorization "";
+    proxy_set_header Connection "";
+    proxy_request_buffering on;
+    proxy_buffering off;
+  }
+
+  # Route everything else to OpenAI API.
+  location /v1/ {
+    proxy_pass https://api.openai.com;
+    proxy_ssl_server_name on;
+    proxy_set_header Host api.openai.com;
+    proxy_set_header Connection "";
+    proxy_request_buffering on;
+    proxy_buffering off;
+  }
+}

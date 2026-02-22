@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test --test-isolation=none",
-    "test:watch": "node --test --test-isolation=none --watch",
+    "test": "node --test --test-isolation=none test/*.test.js test/hooks/*.test.js",
+    "test:watch": "node --test --test-isolation=none --watch test/*.test.js test/hooks/*.test.js",
     "setup": "node scripts/setup.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog:init": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"

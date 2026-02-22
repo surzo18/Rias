@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "jobs": [
+    {
+      "name": "morning-brief",
+      "schedule": { "kind": "cron", "expr": "0 7 * * *", "tz": "Europe/Bratislava" },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Ranný briefing. Zozbieraj VŠETKY dáta najskôr (emaily, kalendár, počasie, AI správy, market, tracking, audit, GitHub), potom sformátuj do JEDNEJ správy v tomto formáte:\n\n❄️ RANNÝ BRIEFING — {dátum, deň v týždni}\n\n📬 INBOX ({celkový počet neprečítaných})\nPre KAŽDÝ účet v TOOLS.md použi email-assistant skill (list_unread). Zobraz max 3 najdôležitejšie za účet. Formát: • [účet] Odosielateľ — predmet. Ak 0 neprečítaných, napíš ✅ Čisto.\n\n📅 DNES V KALENDÁRI\nPouži calendar-assistant skill (calendar_today) pre primárny účet. Formát: • HH:MM — Názov udalosti. Ak nič, napíš 📭 Voľný deň.\n\n🌤️ POČASIE\nPouži weather skill (action: current). Jednovetovo: teplota, pocitová teplota, stav, čo si obliecť.\n\n📈 MARKET WATCHLIST\nPouži market-data skill (quote) pre každý symbol vo watchliste (alert_list). Formát: • SYMBOL: $cena (▲/▼ zmena%). Ak watchlist prázdny, preskočiť celú sekciu.\n\n🤖 AI & TECH SPRÁVY\nPouži web-researcher skill (search: 'AI news last 24 hours'). Max 3 najvýznamnejšie: • Headline — 1 veta zhrnutie. Preskočiť marketing a minor updaty.\n\n🏋️ TRACKING\nPrečítaj FOOD.md — má včerajší záznam? Ak áno: ✅ Jedlo zalogované (odhad kcal). Ak nie: ⚠️ Včera chýba záznam jedla.\nPrečítaj EXERCISE.md — má včerajší záznam? Ak áno: ✅ Tréning zalogovaný. Ak nie: ⚠️ Včera žiadna aktivita.\nPrečítaj HABITS.md — aktuálne streaky. Formát: • Habit: 🔥 X dní streak.\n\n💰 VČERAJŠIE NÁKLADY\nPouži audit-logger skill — GET /costs/{včerajší dátum}. Formát: Celkom: $X.XX | Tokeny: N | Akcie: N (safe/notice/dangerous).\n\n🔧 GITHUB\nAk gh je autorizovaný: skontroluj notifikácie a open PRs. Ak nie: preskočiť.\n\n❄️ SLOVO DŇA\nJedna veta motivácie/výzvy v Esdeath štýle. Krátke, úderné.\n\nDÔLEŽITÉ: Použi v2 skill kontajnery (curl cez exec), NIE natívne nástroje. Každú sekciu oddeľ prázdnym riadkom. Ak tool zlyhá, napíš ⚠️ [nedostupné] a pokračuj ďalej."
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "5914523498",
+        "bestEffort": true
+      },
+      "enabled": true
+    },
+    {
+      "name": "evening-recap",
+      "schedule": { "kind": "cron", "expr": "0 21 * * *", "tz": "Europe/Bratislava" },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Večerný recap. Zozbieraj VŠETKY dáta najskôr (emaily, kalendár zajtrajší, dnešné memory, tracking, market, audit, počasie zajtrajšie), potom sformátuj do JEDNEJ správy v tomto formáte:\n\n🌙 VEČERNÝ RECAP — {dátum, deň v týždni}\n\n📬 NEZODPOVEDANÉ EMAILY\nPre KAŽDÝ účet v TOOLS.md použi email-assistant skill (list_unread). Zobraz celkový počet neprečítaných za účet. Ak sú dôležité (nie newsletter/spam), vypíš max 3: • [účet] Odosielateľ — predmet. Ak 0, napíš ✅ Inbox čistý.\n\n📅 ZAJTRAJŠÍ PROGRAM\nPouži calendar-assistant skill (calendar_week alebo calendar_today pre zajtrajší dátum) pre primárny účet. Formát: • HH:MM — Názov udalosti. Ak nič, napíš 📭 Zajtrajšok voľný.\n\n🌤️ POČASIE ZAJTRA\nPouži weather skill (action: forecast). Jednovetovo: zajtrajšia teplota, stav, na čo sa pripraviť.\n\n📊 DNEŠNÝ DEŇ — ZHRNUTIE\nPrečítaj memory/{dnešný dátum}.md. Zhrň max 3-5 bodov čo sme dnes robili/dosiahli. Formát: • Čo sa stalo/spravilo. Ak prázdny deň, napíš to.\n\n📈 MARKET CLOSE\nPouži market-data skill (quote) pre watchlist symboly. Formát: • SYMBOL: $cena (▲/▼ denná zmena%). Ak watchlist prázdny, preskočiť.\n\n🍽️ JEDLO DNES\nPrečítaj FOOD.md — má dnešný záznam? Ak áno: zobraz čo jedol a odhad kcal. Ak nie: ⚠️ Dnes chýba záznam — Čo si jedol? Zapíš si to.\n\n💪 CVIČENIE DNES\nPrečítaj EXERCISE.md — má dnešný záznam? Ak áno: ✅ zobraz aktivitu. Ak nie: ⚠️ Dnes žiadna aktivita — Stihneš ešte aspoň prechádzku?\n\n🔥 STREAKY\nPrečítaj HABITS.md. Zobraz aktuálne streaky: • Habit: 🔥 X dní. Ak niečo dnes chýba, upozorni.\n\n💰 DNEŠNÉ NÁKLADY\nPouži audit-logger skill — GET /costs/{dnešný dátum}. Formát: $X.XX | Tokeny: N | Akcie: N.\n\n🌙 NA DOBRÚ NOC\nJedna veta zhodnotenia dňa v Esdeath štýle. Pochvála ak bol produktívny, výzva ak nie.\n\nDÔLEŽITÉ: Použi v2 skill kontajnery (curl cez exec), NIE natívne nástroje. Ak tool zlyhá, napíš ⚠️ [nedostupné] a pokračuj ďalej."
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "5914523498",
+        "bestEffort": true
+      },
+      "enabled": true
+    },
+    {
+      "name": "weekly-review",
+      "schedule": { "kind": "cron", "expr": "0 19 * * 0", "tz": "Europe/Bratislava" },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Týždenná review. Zozbieraj VŠETKY dáta za celý týždeň (FOOD.md, EXERCISE.md, HABITS.md, memory/ za 7 dní, audit costs za 7 dní, market performance, GitHub), potom sformátuj do JEDNEJ správy v tomto formáte:\n\n📋 TÝŽDENNÁ REVIEW — Týždeň {číslo týždňa}, {dátum pondelok} — {dátum nedeľa}\n\n🍽️ STRAVOVANIE\nPrečítaj FOOD.md za posledných 7 dní. Zhrň:\n• Počet zalogovaných dní: X/7\n• Priemerné kalórie: ~X kcal/deň\n• Najlepší deň: {deň} ({kcal})\n• Najhorší deň: {deň} ({kcal} alebo nezalogovaný)\n• Trend: ▲ lepšie / ▼ horšie / ➡️ stabilné vs minulý týždeň\nAk menej ako 4/7 dní zalogované: ⚠️ Slabé logovanie — treba zlepšiť.\n\n💪 CVIČENIE\nPrečítaj EXERCISE.md za posledných 7 dní. Zhrň:\n• Počet aktívnych dní: X/7\n• Celkový čas: X min\n• Typy aktivít: beh, posilka, prechádzka...\n• Trend: ▲/▼/➡️ vs minulý týždeň\nAk menej ako 3/7 dní: ⚠️ Málo pohybu.\n\n🔥 HABIT STREAKY\nPrečítaj HABITS.md. Pre každý habit:\n• Habit: 🔥 X dní streak | tento týždeň: X/7 ✅\nVyznač najdlhší streak a ak sa niečo pokazilo.\n\n📊 TÝŽDEŇ V ČÍSLACH\nPrečítaj memory/ súbory za posledných 7 dní. Zhrň:\n• Najvýznamnejšie 3-5 udalostí/úspechov\n• Problémy/bloky na ktoré si narazil\n• Formát: • {deň}: Čo sa stalo\n\n📈 MARKET TÝŽDEŇ\nPouži market-data skill (history) pre watchlist symboly. Formát:\n• SYMBOL: $cena | týždeň: ▲/▼ X% | Poznámka ak výrazný pohyb.\nAk watchlist prázdny, preskočiť.\n\n💰 NÁKLADY ZA TÝŽDEŇ\nPouži audit-logger skill — GET /costs/ pre každý deň za 7 dní. Sumarizuj:\n• Celkom: $X.XX\n• Priemer/deň: $X.XX\n• Najdrahší deň: {deň} ($X.XX)\n• Tokeny celkom: N\n• Trend vs minulý týždeň: ▲/▼/➡️\n\n🔧 GITHUB\nAk gh je autorizovaný:\n• Open PRs: X (vypíš názvy)\n• Merged tento týždeň: X\n• Notifikácie: X neprezreté\nAk nie je autorizovaný: preskočiť.\n\n🧠 LESSONS LEARNED\nZ memory/ súborov extrahuj čo sa naučil, chyby, postrehy. Max 3 body.\nUpdate MEMORY.md ak je niečo dôležité na dlhodobé zapamätanie.\n\n🎯 CIELE NA BUDÚCI TÝŽDEŇ\nNa základe trendov navrhni 3 konkrétne ciele:\n• 1x fitness cieľ\n• 1x produktivita/projekt cieľ\n• 1x habit/osobný cieľ\nFormuluj ako výzvu, nie ako želanie.\n\n❄️ VERDIKT GENERÁLKY\nCelkové zhodnotenie týždňa v Esdeath štýle. 2-3 vety. Bola to víťazná bitka alebo ústup? Čo musí byť budúci týždeň inak?\n\nDÔLEŽITÉ: Použi v2 skill kontajnery (curl cez exec), NIE natívne nástroje. Ak tool zlyhá, napíš ⚠️ [nedostupné] a pokračuj ďalej. Po dokončení review ulož zhrnutie do memory/{dnešný dátum}.md."
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "5914523498",
+        "bestEffort": true
+      },
+      "enabled": true
+    },
+    {
+      "name": "monthly-review",
+      "schedule": { "kind": "cron", "expr": "0 18 1 * *", "tz": "Europe/Bratislava" },
+      "sessionTarget": "isolated",
+      "wakeMode": "now",
+      "payload": {
+        "kind": "agentTurn",
+        "message": "Mesačná review. Zozbieraj VŠETKY dáta za celý minulý mesiac (FOOD.md, EXERCISE.md, HABITS.md, memory/ za 30 dní, audit costs za 30 dní, market, GitHub), potom sformátuj do JEDNEJ správy v tomto formáte:\n\n📆 MESAČNÁ REVIEW — {názov mesiaca} {rok}\n\n━━━━━━━━━━━━━━━━━━━━\n🏥 ZDRAVIE & TELO\n━━━━━━━━━━━━━━━━━━━━\n\n🍽️ STRAVOVANIE\nPrečítaj FOOD.md za celý minulý mesiac. Zhrň:\n• Zalogované dni: X/30 (X%)\n• Priemerné kalórie: ~X kcal/deň\n• Najlepší týždeň: Týždeň X (~X kcal priemer)\n• Najhorší týždeň: Týždeň X (~X kcal priemer alebo veľa nezalogovaných)\n• Trend za mesiac: ▲/▼/➡️ (porovnaj prvý vs posledný týždeň)\n• Top 3 najčastejšie jedlá (ak sa dajú identifikovať)\n\n💪 CVIČENIE\nPrečítaj EXERCISE.md za celý mesiac. Zhrň:\n• Aktívne dni: X/30 (X%)\n• Celkový čas: X min (X hodín)\n• Priemer za týždeň: X min\n• Typy aktivít: rozdelenie (koľkokrát čo)\n• Najaktívnejší týždeň: Týždeň X (X min)\n• Najslabší týždeň: Týždeň X (X min)\n• Trend: ▲/▼/➡️\n\n🔥 HABIT STREAKY — MESAČNÝ PREHĽAD\nPrečítaj HABITS.md. Pre každý habit:\n• Habit: aktuálny streak 🔥 X dní | tento mesiac: X/30 ✅ (X%)\n• Najdlhší streak v mesiaci: X dní\n• Koľkokrát sa streak prerušil: X\n\n━━━━━━━━━━━━━━━━━━━━\n💼 PRODUKTIVITA\n━━━━━━━━━━━━━━━━━━━━\n\n📊 MESIAC V ČÍSLACH\nPrečítaj memory/ súbory za celý mesiac. Zhrň:\n• Počet aktívnych dní (keď sa niečo dialo): X/30\n• Top 5 udalostí/míľnikov\n• Projekty na ktorých sa pracovalo\n• Problémy/bloky ktoré sa opakovali\n\n🔧 GITHUB (ak autorizovaný)\n• PRs merged tento mesiac: X\n• PRs otvorené: X\n• Najaktívnejšie repozitáre\n• Commity celkom (ak dostupné)\nAk nie je autorizovaný: preskočiť.\n\n━━━━━━━━━━━━━━━━━━━━\n💰 FINANCIE & NÁKLADY\n━━━━━━━━━━━━━━━━━━━━\n\n🤖 ESDEATH PREVÁDZKOVÉ NÁKLADY\nPouži audit-logger skill — GET /costs/ pre každý deň za 30 dní. Sumarizuj:\n• Celkové náklady: $X.XX\n• Priemer/deň: $X.XX\n• Najdrahší deň: {dátum} ($X.XX) — čo sa vtedy dialo?\n• Najlacnejší deň: {dátum} ($X.XX)\n• Tokeny celkom: X (X mil)\n• Celkové akcie: X (breakdown safe/notice/dangerous)\n• Trend vs minulý mesiac: ▲/▼/➡️\n\n📈 MARKET MESAČNÝ PREHĽAD\nPouži market-data skill (history) pre watchlist symboly. Formát:\n• SYMBOL: $cena | mesiac: ▲/▼ X% | High: $X / Low: $X\n• Celkový výkon portfólia (ak viac symbolov)\nAk watchlist prázdny, preskočiť.\n\n━━━━━━━━━━━━━━━━━━━━\n🧠 RETROSPEKTÍVA\n━━━━━━━━━━━━━━━━━━━━\n\n✅ ČO SA PODARILO\nMax 5 bodov — konkrétne úspechy, dokončené veci, dosiahnuté ciele.\n\n❌ ČO SA NEPODARILO\nMax 3 body — nesplnené ciele, opakujúce sa problémy, zanedbané oblasti.\n\n🧠 KĽÚČOVÉ POSTREHY\nMax 3 body — lessons learned, nové vzorce, dôležité rozhodnutia.\nUpdate MEMORY.md s tým čo stojí za dlhodobé zapamätanie.\n\n🎯 CIELE NA BUDÚCI MESIAC\nNa základe analýzy navrhni 5 konkrétnych cieľov:\n• 1x zdravie/fitness\n• 1x stravovanie\n• 1x habit\n• 1x projekt/práca\n• 1x osobný rozvoj\nKaždý cieľ s merateľným kritériom (číslo, dátum, výsledok).\n\n❄️ VERDIKT GENERÁLKY\n3-5 viet celkového zhodnotenia mesiaca v Esdeath štýle. Bol to mesiac hodný vojaka? Čo musí byť budúci mesiac inak? Kde bola slabina a kde sila?\n\nDÔLEŽITÉ: Použi v2 skill kontajnery (curl cez exec), NIE natívne nástroje. Ak tool zlyhá, napíš ⚠️ [nedostupné] a pokračuj ďalej. Po dokončení review ulož zhrnutie do memory/{dnešný dátum}.md a update MEMORY.md."
+      },
+      "delivery": {
+        "mode": "announce",
+        "channel": "telegram",
+        "to": "5914523498",
+        "bestEffort": true
+      },
+      "enabled": true
+    }
+  ]
+}

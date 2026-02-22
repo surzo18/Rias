@@ -1,0 +1,607 @@
+services:
+  openclaw-gateway:
+    build:
+      context: ./scripts/gateway
+    image: openclaw-gateway:local
+    container_name: clawdbot-gateway
+    user: "1000:1000"
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/config/openclaw.json
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://llm-router:8080/v1}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      GOG_KEYRING_PASSWORD: ${GOG_KEYRING_PASSWORD:-openclaw}
+      TOOL_INTERNAL_TOKEN: ${TOOL_INTERNAL_SECRET}
+    volumes:
+      - openclaw_home:/home/node
+      - ./openclaw-data/config:/home/node/.openclaw/config
+      - ./openclaw-data/config/workspace/skills:/home/node/.openclaw/workspace/skills:ro
+    ports:
+      - "127.0.0.1:${OPENCLAW_GATEWAY_PORT:-18789}:18789"
+      - "127.0.0.1:${OPENCLAW_BRIDGE_PORT:-18790}:18790"
+    depends_on:
+      - openai-router
+    command:
+      [
+        "node", "dist/index.js", "gateway",
+        "--bind", "lan",
+        "--port", "18789",
+      ]
+    init: true
+    restart: unless-stopped
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /home/node/.cache:noexec,nosuid,size=50m
+    healthcheck:
+      test:
+        [
+          "CMD", "node", "-e",
+          "fetch('http://127.0.0.1:18789/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    networks:
+      - esdeath-internal
+      - esdeath-external
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  openclaw-cli:
+    image: openclaw-gateway:local
+    container_name: clawdbot-cli
+    user: "1000:1000"
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      OPENCLAW_CONFIG_PATH: /home/node/.openclaw/config/openclaw.json
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://llm-router:8080/v1}
+      TOOL_INTERNAL_TOKEN: ${TOOL_INTERNAL_SECRET}
+      BROWSER: echo
+    volumes:
+      - openclaw_home:/home/node
+      - ./openclaw-data/config:/home/node/.openclaw/config
+    stdin_open: true
+    tty: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+      - /home/node/.cache:noexec,nosuid,size=50m
+    entrypoint: ["node", "dist/index.js"]
+    profiles:
+      - cli
+
+  openai-router:
+    image: nginx:1.27-alpine
+    container_name: clawdbot-openai-router
+    read_only: true
+    environment:
+      TTS_UPSTREAM: ${TTS_UPSTREAM:-chatterbox:8004}
+    tmpfs:
+      - /var/cache/nginx:noexec,nosuid,size=32m
+      - /var/run:noexec,nosuid,size=8m
+      - /tmp:noexec,nosuid,size=32m
+      - /etc/nginx/conf.d:noexec,nosuid,size=1m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+    restart: unless-stopped
+    volumes:
+      - ./openclaw-data/router/nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - ./openclaw-data/router/nginx-main.conf:/etc/nginx/nginx.conf:ro
+      - ./openclaw-data/router/30-tts-routing.sh:/docker-entrypoint.d/30-tts-routing.sh:ro
+    networks:
+      - esdeath-internal
+      - esdeath-external
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  chatterbox:
+    build:
+      context: ./scripts/chatterbox
+      dockerfile: Dockerfile.cu128
+      args:
+        RUNTIME: nvidia
+    image: chatterbox-tts:cu128
+    container_name: clawdbot-chatterbox
+    restart: unless-stopped
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+    volumes:
+      - chatterbox_models:/app/model_cache
+      - chatterbox_hf_cache:/app/hf_cache
+      - ./voices:/app/voices
+      - ./scripts/chatterbox/config.yaml:/app/config.yaml:ro
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/docs')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 180s
+      retries: 3
+    networks:
+      - esdeath-internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Fish Speech + TTS adapter (alternative, needs sm_120 PyTorch)
+  fish-speech:
+    image: fishaudio/fish-speech:nightly
+    container_name: clawdbot-fish-speech
+    restart: unless-stopped
+    environment:
+      COMPILE: "0"
+      LLAMA_CHECKPOINT_PATH: checkpoints/fish-speech-1.5
+      DECODER_CHECKPOINT_PATH: checkpoints/fish-speech-1.5/firefly-gan-vq-fsq-8x1024-21hz-generator.pth
+      DECODER_CONFIG_NAME: firefly_gan_vq
+    volumes:
+      - fish_speech_checkpoints:/app/checkpoints
+      - ./voices:/app/references
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=200m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - fish-speech
+
+  tts-adapter:
+    build: ./scripts/tts-adapter
+    image: tts-adapter:local
+    container_name: clawdbot-tts-adapter
+    restart: unless-stopped
+    user: "1000:1000"
+    environment:
+      FISH_SPEECH_HOST: fish-speech
+      FISH_SPEECH_PORT: "8080"
+      PORT: "3100"
+    depends_on:
+      fish-speech:
+        condition: service_started
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    profiles:
+      - fish-speech
+
+  # XTTS v2 (voice cloning with multilingual support)
+  xtts:
+    build: ./scripts/xtts
+    image: xtts-v2:cu128
+    container_name: clawdbot-xtts
+    restart: unless-stopped
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      TTS_LANGUAGE: en
+    volumes:
+      - xtts_model:/root/.local/share/tts
+      - ./voices:/app/voices
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 3
+    profiles:
+      - xtts
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  kokoro-tts:
+    image: ghcr.io/remsky/kokoro-fastapi-gpu:v0.2.2
+    container_name: clawdbot-kokoro-tts
+    restart: unless-stopped
+    environment:
+      HF_HOME: /models/hf
+      TRANSFORMERS_CACHE: /models/hf
+    volumes:
+      - kokoro_models:/models
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:noexec,nosuid,size=128m
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - kokoro
+
+  # === Esdeath v2 Platform Services ===
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: clawdbot-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - esdeath-internal
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  llm-router:
+    build:
+      context: .
+      dockerfile: scripts/llm-router/Dockerfile
+    container_name: clawdbot-llm-router
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    environment:
+      PORT: "8080"
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_ROUTER_URL: http://openai-router:8080/v1
+      OLLAMA_URL: http://ollama:11434/v1
+      AUDIT_DB_URL: http://audit-db:9000
+      DAILY_BUDGET_USD: ${DAILY_BUDGET_USD:-1.00}
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+    volumes:
+      - ./config/llm-providers.json:/app/config/llm-providers.json:ro
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    networks:
+      - esdeath-internal
+      - esdeath-external
+    depends_on:
+      - openai-router
+      - ollama
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  audit-db:
+    build:
+      context: .
+      dockerfile: scripts/audit-db/Dockerfile
+    container_name: clawdbot-audit-db
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    environment:
+      PORT: "9000"
+      DB_PATH: /data/audit.db
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID}
+      TELEGRAM_LOG_CHANNEL_ID: ${TELEGRAM_LOG_CHANNEL_ID:-}
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - audit_data:/data
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    networks:
+      - esdeath-internal
+      - esdeath-telegram
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:9000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  shell-sandbox:
+    build:
+      context: .
+      dockerfile: scripts/shell-sandbox/Dockerfile
+    container_name: clawdbot-shell
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    environment:
+      PORT: "9001"
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+    ports:
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - /c/Users/adria/Documents:/mnt/documents:ro
+      - /c/Users/adria/Downloads:/mnt/downloads:rw
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    networks:
+      - esdeath-internal
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:9001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  email-tool:
+    build:
+      context: .
+      dockerfile: scripts/email-tool/Dockerfile
+    container_name: clawdbot-email
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    environment:
+      PORT: "9003"
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+      GOG_KEYRING_PASSWORD: ${GOG_KEYRING_PASSWORD:-openclaw}
+    volumes:
+      - email_oauth:/data/oauth:ro
+    tmpfs:
+      - /tmp:noexec,nosuid,size=32m
+    networks:
+      - esdeath-internal
+      - esdeath-google
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  web-browser:
+    build:
+      context: .
+      dockerfile: scripts/web-browser/Dockerfile
+    container_name: clawdbot-web
+    cap_drop: [ALL]
+    cap_add: [SYS_ADMIN]
+    security_opt: [no-new-privileges:true]
+    environment:
+      PORT: "9002"
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+    tmpfs:
+      - /tmp:nosuid,size=256m
+    networks:
+      - esdeath-internal
+      - esdeath-web
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: '1.0'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  searxng:
+    image: searxng/searxng:latest
+    container_name: clawdbot-searxng
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETGID, SETUID, DAC_OVERRIDE]
+    security_opt: [no-new-privileges:true]
+    environment:
+      SEARXNG_BASE_URL: "http://searxng:8080/"
+    volumes:
+      - ./openclaw-data/searxng:/etc/searxng:rw
+    networks:
+      - esdeath-internal
+      - esdeath-web
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.5'
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8080/healthz"]
+      interval: 60s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  market-tool:
+    build:
+      context: .
+      dockerfile: scripts/market-tool/Dockerfile
+    container_name: clawdbot-market
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    environment:
+      PORT: "9004"
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+      ALPHA_VANTAGE_KEY: ${ALPHA_VANTAGE_KEY:-}
+    volumes:
+      - market_data:/data
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    networks:
+      - esdeath-internal
+      - esdeath-market
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+  weather-tool:
+    build:
+      context: .
+      dockerfile: scripts/weather-tool/Dockerfile
+    container_name: clawdbot-weather
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    user: "1000:1000"
+    environment:
+      PORT: "9005"
+      INTERNAL_SECRET: ${TOOL_INTERNAL_SECRET}
+      WEATHER_DEFAULT_LOCATION: "Kysucke+Nove+Mesto"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=16m
+    networks:
+      - esdeath-internal
+      - esdeath-weather
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:9005/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    profiles:
+      - v2
+
+networks:
+  esdeath-internal:
+    driver: bridge
+    internal: true
+  esdeath-external:
+    driver: bridge
+  esdeath-google:
+    driver: bridge
+  esdeath-web:
+    driver: bridge
+  esdeath-market:
+    driver: bridge
+  esdeath-weather:
+    driver: bridge
+  esdeath-telegram:
+    driver: bridge
+
+volumes:
+  openclaw_home:
+    external: true
+    name: clawdbot_home
+  kokoro_models:
+  fish_speech_checkpoints:
+  chatterbox_models:
+  chatterbox_hf_cache:
+  xtts_model:
+  ollama_models:
+  audit_data:
+  market_data:
+  email_oauth:

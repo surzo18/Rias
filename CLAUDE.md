@@ -14,7 +14,7 @@ Business logika a projektove skills patria do `src/`.
 - **Documentation workflow** — automaticke doc reminders, changelog generovanie
 - **Session management** — handover snapshots, session counter, learnings restore
 - **Project skills framework** — YAML frontmatter format, skill inventory
-- **Zero dependencies** — node:test, bash hooks, 80+ testov
+- **Zero dependencies** — node:test, bash hooks, 100+ testov
 
 ## Runtime model
 
@@ -44,18 +44,27 @@ npm run changelog:init # Full CHANGELOG.md rebuild
 
 ```text
 .claude/
-|- hooks/              # 7 production-ready hookov
+|- hooks/              # 9 production-ready hookov (slúžia aj pre esdeath)
 |- rules/              # 4 project rules
 |- skills/             # 4 workflow skills
 |- agents/             # agent configs
 |- audits/             # verzovany audit baseline
 |- learnings/          # verzovane default sablony
 `- local/              # lokalny runtime stav (gitignored)
-src/skills/            # projektove skills
+src/
+|- esdeath/            # Produkčná aplikácia (personal assistant)
+|  |- scripts/         # Docker build contexts (11 services)
+|  |- skills/          # OpenClaw skills (11)
+|  |- src/             # TypeScript service modules
+|  |- docker-compose.yml
+|  `- CLAUDE.md        # esdeath-specific instructions
+`- skills/             # Projektové Rias skills (placeholder)
 scripts/setup.js       # interactive setup
 test/                  # hook testy (80+)
 docs/skills/index.md   # skill inventory
 ```
+
+> `.claude/` infraštruktúra (hooks, rules, skills) slúži aj pre esdeath kód v `src/esdeath/`.
 
 ## Hooks
 
@@ -66,6 +75,8 @@ docs/skills/index.md   # skill inventory
 - `on-stop-token-log.sh` → runtime token logging
 - `on-compact-handover.sh` → runtime handover snapshot
 - `post-edit-docs.sh` → docs reminder
+- `enforce-tdd.sh` → TDD enforcement, blokuje src/**/*.js bez testu
+- `telegram-hitl.sh` → HITL approval pre rizikove prikazy cez Telegram
 
 ## Skills
 

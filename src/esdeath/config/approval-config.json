@@ -1,0 +1,32 @@
+{
+  "tiers": {
+    "safe": {
+      "actions": ["chat", "weather", "memory_read", "summarize", "fitness_read", "habit_read"],
+      "behavior": "auto_execute",
+      "notify": false
+    },
+    "notice": {
+      "actions": ["email_read", "calendar_read", "web_search", "market_read", "github_read", "file_read", "system_info"],
+      "behavior": "auto_execute",
+      "notify": true
+    },
+    "dangerous": {
+      "actions": ["shell_exec", "email_send", "email_delete", "file_write", "file_delete", "calendar_create", "alert_set"],
+      "behavior": "require_approval",
+      "timeout_minutes": 30,
+      "max_retries": 1
+    },
+    "forbidden": {
+      "actions": ["env_access", "config_write", "docker_exec", "credential_access", "network_change"],
+      "behavior": "always_reject",
+      "alert": true
+    }
+  },
+  "defaults": {
+    "unknown_action": "dangerous",
+    "offline_policy": "queue"
+  },
+  "rate_limits": {
+    "dangerous_per_hour": 5
+  }
+}
